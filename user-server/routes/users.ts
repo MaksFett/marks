@@ -20,14 +20,13 @@ userRoutes.post('/', (req: Request, res: Response) => {
     .insert({
       login: req.body.login,
       password_hash: req.body.password,
-      email: req.body.email,
-      cathedra: req.body.cathedra
+      email: req.body.email
     })
     .then(userId => {
       res.status(201).json({ newUserId: userId[0] });
     })
     .catch((err) => {
-      res.status(500).json({ message: 'Error creating new user' + err });
+      res.status(500).json({ message: 'Error creating new user ' + err });
     });
 });
 

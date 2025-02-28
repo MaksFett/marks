@@ -13,7 +13,11 @@ services:
       - SYS_NICE
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./api-server/db-setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - ./user-server/users-setup.sql:/docker-entrypoint-initdb.d/setup_1.sql
+      - ./main-server/students-setup.sql:/docker-entrypoint-initdb.d/setup_2.sql
+      - ./main-server/subjects-setup.sql:/docker-entrypoint-initdb.d/setup_3.sql
+      - ./main-server/marks-setup.sql:/docker-entrypoint-initdb.d/setup_4.sql
+
     ports:
       - "9906:3306"
     environment:
@@ -23,7 +27,8 @@ services:
 
   nginx:
     depends_on:
-      - api
+      - user_api
+      - main_api
       - client
     restart: always
     build:
@@ -32,21 +37,38 @@ services:
     ports:
       - "8008:80"
 
-  api:
+  main_api:
     build:
-      context: ./api-server
+      context: ./main-server
       target: dev
     depends_on:
       - db
     volumes:
-      - ./api-server:/src
+      - ./main-server:/src
       - /src/node_modules
     command: npm run start:dev
     ports:
-      - $API_PORT:$API_PORT
+      - $MAIN_API_PORT:$MAIN_API_PORT
     environment:
       <<: *common-variables
-      PORT: $API_PORT
+      PORT: $MAIN_API_PORT
+      NODE_ENV: development
+
+  user_api:
+    build:
+      context: ./user-server
+      target: dev
+    depends_on:
+      - db
+    volumes:
+      - ./user-server:/src
+      - /src/node_modules
+    command: npm run start:dev
+    ports:
+      - $USER_API_PORT:$USER_API_PORT
+    environment:
+      <<: *common-variables
+      PORT: $USER_API_PORT
       NODE_ENV: development
   
   client:

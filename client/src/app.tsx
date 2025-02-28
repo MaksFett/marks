@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import * as React from 'react';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import './app.css';
 
 type IUser = {
   login: string;
   password: string;
   email: string;
-  cathedra: string;
 }
 
 interface UserProps {
@@ -19,7 +18,6 @@ const User = ({ user }: UserProps) => {
     <article className="user">
       <h2>{user.login}</h2>
       <p>{user.email}</p>
-      <p>{user.cathedra}</p>
     </article>
   )
 }
@@ -28,7 +26,6 @@ interface CustomElements extends HTMLFormControlsCollection {
   login: HTMLInputElement;
   password: HTMLInputElement;
   email: HTMLInputElement;
-  cathedra: HTMLInputElement;
 }
 
 interface CustomForm extends HTMLFormElement {
@@ -44,11 +41,10 @@ const Register = ( {onPost}: RegisterProps) => {
     e.preventDefault();
     const target = e.currentTarget.elements;
     axios
-      .post('/api/users', {
+      .post('/user_api/users', {
         login: target.login.value,
         password: target.password.value,
-        email: target.email.value,
-        cathedra: target.cathedra.value
+        email: target.email.value
       })
       .then(() => {
         onPost();
@@ -70,10 +66,6 @@ const Register = ( {onPost}: RegisterProps) => {
         <label htmlFor="email">Email:</label>
         <input type="text" id="email" name="email" />
       </div>
-      <div className="form-input">
-        <label htmlFor="cathedra">Cathedra:</label>
-        <input type="text" id="cathedra" name="cathedra" />
-      </div>
       <div>
         <button type="submit">Create New User</button>
       </div>
@@ -86,8 +78,8 @@ const App = () => {
 
   const fetchUsers = () => {
     axios
-      .get('/api/users')
-      .then(res => {
+      .get('/user_api/users')
+      .then((res: AxiosResponse) => {
         setUsers(res.data);
       });
   }

@@ -4,4 +4,3 @@ pids
 *.pid
 *.seed
 *.pid.lock
-.env
