@@ -24,3 +24,94 @@ label {
 .form-input {
   margin-bottom: 1rem;
 }
+
+/* Основной контейнер приложения */
+.app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Контейнер для списка пользователей и формы */
+.user-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 900px;
+  background-color: #fff; /* белый фон для формы */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* легкая тень */
+  padding: 20px;
+}
+
+/* Секция с пользователями */
+.users {
+  width: 60%;
+}
+
+.user {
+  background-color: #f0f0f5;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.user h2 {
+  color: #333;
+  font-size: 20px;
+}
+
+.user p {
+  color: #777;
+}
+
+/* Форма регистрации */
+form {
+  width: 35%;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-input {
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+button {
+  padding: 12px 20px;
+  background-color: #ff7f50; /* оранжевый цвет */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #ff5722; /* темнее при наведении */
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
