@@ -1,0 +1,66 @@
+/* Header.module.css */
+.header {
+    background-color: #007bff; /* Голубой цвет */
+    padding: 10px 20px;
+    position: fixed; /* Фиксируем хэдер сверху */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Чтобы хэдер был всегда сверху */
+    text-align: center;
+}
+
+.navList {
+    display: flex;
+    justify-content: center; /* Выравниваем элементы по центру */
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navList li {
+    font-size: 18px;
+}
+
+.navList a {
+    text-decoration: none;
+    color: white; /* Белый цвет для текста */
+    
+    transition: color 0.3s ease;
+}
+
+.navList a:hover {
+    color: #f8f9fa; /* Становится чуть светлее при наведении */
+}
+
+.navList li button.logout-btn {
+    background-color: #007bff;
+    border: none;
+    padding: 5px 15px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Плавный переход фона */
+}
+
+.navList li button.logout-btn:hover {
+    background-color: #2f3ad3; /* Изменение фона при наведении */
+}
+
+body {
+    padding-top: 60px; /* Добавляем отступ, чтобы содержимое не перекрывало хэдер */
+}
+
+@media (max-width: 768px) {
+    .navList {
+        flex-direction: column; /* На мобильных устройствах выстраиваем меню по вертикали */
+        gap: 10px;
+    }
+}
+
+/* Добавлен hover для всех ссылок, чтобы цвет менялся плавно */
+.navList li a:hover {
+    color: #f8f9fa; /* Светлый оттенок текста при наведении */
+    text-decoration: underline; /* Подчеркивание текста на ховере */
+}
