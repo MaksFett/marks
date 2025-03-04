@@ -1,25 +1,23 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import UserList from "./components/UserList";
-import RegisterForm from "./components/RegisterForm";
-import { IUser } from "./types";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import "./styles.css";
+import "./Header.css";
 
 const App: React.FC = () => {
-    const [users, setUsers] = useState<IUser[]>([]);
-
-    useEffect(() => {
-        axios.get("http://localhost:3000/user_api/users")
-            .then(response => setUsers(response.data))
-            .catch(error => console.error("Ошибка загрузки пользователей:", error));
-    }, []);
+    const isAuthenticated = !!localStorage.getItem("token"); // Проверка, вошёл ли пользователь
 
     return (
-        <div className="container">
-            <h1>Система мониторинга успеваемости студентов</h1>
-            <RegisterForm />
-            <UserList users={users} />
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/register" />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/register" />} />
+            </Routes>
+        </Router>
     );
 };
 
