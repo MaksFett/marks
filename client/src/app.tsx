@@ -12,10 +12,10 @@ const App: React.FC = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/register" />} />
+                <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/register" />} />
+                <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
             </Routes>
         </Router>
     );
