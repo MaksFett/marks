@@ -19,6 +19,7 @@ const Header: React.FC = () => {
             <nav>
                 <ul className="navList">
                     <li><Link to="/">Главная</Link></li>
+                    <li><Link to="/grades">Список оценок</Link></li>
                     <li><Link to="/profile">Личный кабинет</Link></li>
                     {/* Если пользователь авторизован, показываем "Выход", иначе "Вход" и "Регистрация" */}
                     {isAuthenticated ? (

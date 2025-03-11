@@ -1,112 +1,88 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 const Register: React.FC = () => {
-  const [login, setLogin] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const emailRef = useRef<HTMLInputElement>(null);
+    const validationSchema = Yup.object({
+        login: Yup.string().required("Логин обязателен"),
+        email: Yup.string()
+            .email("Неверный формат email")
+            .required("Email обязателен"),
+        password: Yup.string()
+            .min(6, "Пароль должен содержать минимум 6 символов")
+            .required("Пароль обязателен"),
+    });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:3000/user_api/users", { login, password, email });
-      navigate("/login");
-    } catch (error) {
-      console.error("Ошибка регистрации", error);
-    }
-  };
+    const formik = useFormik({
+        initialValues: {
+            login: "",
+            email: "",
+            password: "",
+        },
+        validationSchema,
+        validateOnBlur: true,  // <-- добавлено
+        validateOnChange: true, 
+        onSubmit: async (values) => {
+            try {
+                await axios.post("http://localhost:3000/user_api/users", values);
+                navigate("/login");
+            } catch (error) {
+                console.error("Ошибка регистрации", error);
+            }
+        },
+    });
 
-  // Проверка email при изменении значения
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
+    return (
+        <form onSubmit={formik.handleSubmit}>
+            <h2>Регистрация</h2>
 
-    // Проверка email по шаблону
-    if (e.target.validity.valid || value === "") {
-      setEmailError("");
-    } else {
-      setEmailError("Неверный формат email. Обязательно наличие символа @.");
-    }
-  };
+            <input
+                type="text"
+                name="login"
+                placeholder="Логин"
+                value={formik.values.login}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+            />
+            {formik.touched.login && formik.errors.login && <div style={{ color: "red" }}>{formik.errors.login}</div>}
 
-  // Проверка, что форма валидна (все поля заполнены, email корректен)
-  const isFormValid = login && email && password && !emailError;
+            <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+            />
+            {formik.touched.email && formik.errors.email && <div style={{ color: "red" }}>{formik.errors.email}</div>}
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2>Регистрация</h2>
-      
-      <input
-        type="text"
-        placeholder="Логин"
-        value={login}
-        onChange={(e) => setLogin(e.target.value)}
-      />
-      
-      {/* Оборачиваем email в контейнер для позиционирования выпадающего списка */}
-      <div style={{ position: "relative", display: "inline-block", width: "100%" }}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={handleEmailChange}
-          onFocus={() => setIsEmailFocused(true)}
-          onBlur={() => setIsEmailFocused(false)}
-          required
-          pattern="^[^@]+@[^@]+$"
-          ref={emailRef}
-        />
-        {/* Если поле в фокусе и есть ошибка, выводим dropdown с сообщением */}
-        {isEmailFocused && emailError && (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: "110px",  // Сдвигаем на 10px вправо
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
-              border: "1px solid #f5c6cb",
-              padding: "8px",
-              borderRadius: "4px",
-              marginTop: "4px",
-              zIndex: 10,
-              minWidth: "250px"
-            }}
-          >
-            {emailError}
-          </div>
-        )}
-      </div>
+            <input
+                type="password"
+                name="password"
+                placeholder="Пароль"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+            />
+            {formik.touched.password && formik.errors.password && <div style={{ color: "red" }}>{formik.errors.password}</div>}
 
-      <input
-        type="password"
-        placeholder="Пароль"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      
-      <button
-        type="submit"
-        disabled={!isFormValid}
-        style={{
-          backgroundColor: isFormValid ? "#007bff" : "#ccc",
-          cursor: isFormValid ? "pointer" : "not-allowed",
-        }}
-      >
-        Зарегистрироваться
-      </button>
-      
-      <p>
-        Уже есть аккаунт? <Link to="/login">Войдите</Link>
-      </p>
-    </form>
-  );
+            <button type="submit" disabled={!(formik.isValid && formik.dirty)} style={{
+                backgroundColor: formik.isValid && formik.dirty ? "#007bff" : "#ccc",
+                cursor: formik.isValid && formik.dirty ? "pointer" : "not-allowed",
+            }}>
+                Зарегистрироваться
+            </button>
+
+
+            <p>
+                Уже есть аккаунт? <Link to="/login">Войдите</Link>
+            </p>
+        </form>
+    );
 };
 
 export default Register;
