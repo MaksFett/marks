@@ -70,6 +70,8 @@ services:
       <<: *common-variables
       PORT: $USER_API_PORT
       NODE_ENV: development
+      JWT_SECRET: $JWT_SECRET
+      JWT_REFRESH_SECRET: $JWT_REFRESH_SECRET
   
   client:
     stdin_open: true
