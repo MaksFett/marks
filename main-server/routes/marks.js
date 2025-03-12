@@ -7,28 +7,46 @@ const express_1 = __importDefault(require("express"));
 const knex_1 = __importDefault(require("knex"));
 const markRoutes = express_1.default.Router();
 const knex1 = (0, knex_1.default)(require('../knexfile.js').development);
-markRoutes.get('/', (_req, res) => {
+markRoutes.get('/get_marks', (_req, res) => {
+    var full_marks = [];
     knex1('marks')
-        .then(data => {
-        res.status(200).json(data);
+        .select("student_id", "subject_id", "value")
+        .then(marks => {
+        knex1('students')
+            .select("id", "fio")
+            .then(students => {
+            knex1('subjects')
+                .select("id", "name")
+                .then(subjects => {
+                full_marks = marks;
+                for (let st of students) {
+                    for (let sub of subjects) {
+                        let student_id = st.id;
+                        let subject_id = sub.id;
+                        if (!full_marks.find((mark) => mark.student_id == student_id && mark.subject_id == subject_id)) {
+                            full_marks.push({ "student_id": student_id, "subject_id": subject_id, "value": null });
+                        }
+                    }
+                }
+                res.status(200).json({ marks: full_marks, students: students, subjects: subjects });
+            });
+        });
     })
         .catch(err => {
-        res.status(500).json({ message: 'Error fetching marks' + err });
+        res.status(500).json({ message: 'Ошибка при получении данных' + err });
     });
 });
-markRoutes.post('/', (req, res) => {
-    knex1('users')
-        .insert({
-        login: req.body.login,
-        password_hash: req.body.password,
-        email: req.body.email,
-        cathedra: req.body.cathedra
-    })
-        .then(markId => {
-        res.status(201).json({ newMarkId: markId[0] });
+markRoutes.post('/add_marks', (req, res) => {
+    const marks = req.body.marks;
+    knex1('marks')
+        .insert(marks)
+        .onConflict("student_id-subject_id")
+        .merge()
+        .then(() => {
+        res.status(200).json({ message: "Оценки успешно добавлены" });
     })
         .catch((err) => {
-        res.status(500).json({ message: 'Error creating new mark' + err });
+        res.status(500).json({ message: 'Ошибка при добавлении студента' + err });
     });
 });
 exports.default = markRoutes;

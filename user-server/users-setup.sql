@@ -4,4 +4,3 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(30),
   PRIMARY KEY (`login`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-INSERT INTO `users` (`login`,`password`,`email`) VALUES ('qwe', 'qwe', 'qwe');

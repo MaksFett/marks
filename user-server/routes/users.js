@@ -21,9 +21,7 @@ const userRoutes = express_1.default.Router();
 const knex1 = (0, knex_1.default)(require('../knexfile.js').development);
 const generateTokens = (login) => {
     const accessToken = jsonwebtoken_1.default.sign({ "login": login }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    console.log(process.env.JWT_REFRESH_SECRET);
     const refreshToken = jsonwebtoken_1.default.sign({ "login": login }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
-    console.log('123');
     return { accessToken, refreshToken };
 };
 let refreshTokens = [];
@@ -69,7 +67,6 @@ userRoutes.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, functi
             return res.status(400).json({ message: "Неверный пароль" });
         const { accessToken, refreshToken } = generateTokens(login);
         refreshTokens.push(refreshToken);
-        console.log(refreshTokens);
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
