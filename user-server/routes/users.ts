@@ -98,7 +98,7 @@ userRoutes.post('/refresh', (req: Request, res: Response): void => {
   }
 
   if (!refreshTokens.includes(token)) {
-    res.status(403).json({ message: "Неверный токен" });
+    res.status(402).json({ message: "Неверный токен" });
     return;
   }
 
