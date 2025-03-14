@@ -5,14 +5,15 @@ import axios from "axios";
 const Login = () => {
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:3000/user_api/login", { login, password });
-            localStorage.setItem("token", response.data.token);
-            navigate("/");
+            await axios.post("/user_api/users/login", { login, password })
+                .then(() => navigate("/"))
+                .catch((error) => setMessage(error.response.status.message));
         } catch (error) {
             console.error("Ошибка входа", error);
         }
@@ -49,6 +50,7 @@ const Login = () => {
             <p>
                 Нет аккаунта? <Link to="/register">Зарегистрируйтесь</Link>
             </p>
+            {message !== "" ? <div>{message}</div> : <div>&nbsp;</div>}
         </form>
     );
 };

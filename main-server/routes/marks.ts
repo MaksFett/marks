@@ -1,21 +1,12 @@
 import express, { Request, Response } from "express";
 import knex from "knex";
+import { IGrade, IShortStudent, ISubject } from "../types";
 
 const markRoutes = express.Router();
 const knex1 = knex(require('../knexfile.js').development);
 
-type IStudent = {
-    "id": number,
-    "fio": string
-}
-
-type ISubject = {
-    "id": number,
-    "name": string
-}
-
 markRoutes.get('/get_marks', (_req: Request, res: Response) => {
-  var full_marks: { student_id: number; subject_id: number; value: null; }[] = [];
+  var full_marks: Array<IGrade>;
   knex1('marks')
     .select("student_id", "subject_id", "value")
     .then(marks => {
@@ -28,7 +19,7 @@ markRoutes.get('/get_marks', (_req: Request, res: Response) => {
                     full_marks = marks;
                     for (let st of students){
                         for (let sub of subjects){
-                            let student_id = (st as any as IStudent).id;
+                            let student_id = (st as any as IShortStudent).id;
                             let subject_id = (sub as any as ISubject).id;
                             if (!full_marks.find((mark) => mark.student_id == student_id && mark.subject_id == subject_id )) {
                                 full_marks.push({"student_id": student_id, "subject_id": subject_id, "value": null })
@@ -45,7 +36,7 @@ markRoutes.get('/get_marks', (_req: Request, res: Response) => {
 });
 
 markRoutes.post('/add_marks', (req: Request, res: Response) => {
-  const marks = req.body.marks;
+  const marks: Array<IGrade> = req.body;
   knex1('marks')
     .insert(
       marks

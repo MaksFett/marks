@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { IUser } from "../types";
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
+    const [message, setMessage] = useState<string>("")
 
     const validationSchema = Yup.object({
         login: Yup.string().required("Логин обязателен"),
@@ -26,10 +28,11 @@ const Register: React.FC = () => {
         validationSchema,
         validateOnBlur: true,  // <-- добавлено
         validateOnChange: true, 
-        onSubmit: async (values) => {
+        onSubmit: async (values: IUser) => {
             try {
-                await axios.post("http://localhost:3000/user_api/users", values);
-                navigate("/login");
+                await axios.post("/user_api/users/register", values)
+                    .then(() => navigate("/"))
+                    .catch((error) => setMessage(error.response.data.message));
             } catch (error) {
                 console.error("Ошибка регистрации", error);
             }
@@ -81,6 +84,7 @@ const Register: React.FC = () => {
             <p>
                 Уже есть аккаунт? <Link to="/login">Войдите</Link>
             </p>
+            {message !== "" ? <div>{message}</div> : <div>&nbsp;</div>}
         </form>
     );
 };

@@ -1,38 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/Header";
+import { AuthProps, ISubject, IGrade, IShortStudent } from "../types";
 import "../styles.css";
+import axios from "axios";
 
-const GradeList: React.FC = () => {
+const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const { id } = useParams<{ id?: string }>();
     const selectedStudentId = id ? parseInt(id, 10) : null;
 
-    const students = [
-        { id: 1, name: "Иванов И.И." },
-        { id: 2, name: "Петров П.П." },
-        { id: 3, name: "Сидоров С.С." },
-    ];
+    const [students, setStudents] = useState<Array<IShortStudent>>([]);
 
-    const subjects = [
-        { id: 1, name: "Математический анализ" },
-        { id: 2, name: "Технологии обработки больших данных" },
-        { id: 3, name: "Системное программирование" },
-    ];
+    const [subjects, setSubjects] = useState<Array<ISubject>>([]);
 
-    const initialGrades = [
-        { studentId: 1, subjectId: 1, grade: 4 },
-        { studentId: 1, subjectId: 2, grade: 5 },
-        { studentId: 1, subjectId: 3, grade: 3 },
-        { studentId: 2, subjectId: 1, grade: 5 },
-        { studentId: 2, subjectId: 2, grade: 4 },
-        { studentId: 2, subjectId: 3, grade: 5 },
-        { studentId: 3, subjectId: 1, grade: 3 },
-        { studentId: 3, subjectId: 2, grade: 3 },
-        { studentId: 3, subjectId: 3, grade: 4 },
-    ];
-
-    const [grades, setGrades] = useState(initialGrades);
+    const [grades, setGrades] = useState<Array<IGrade>>([]);
     const [editedGrades, setEditedGrades] = useState<{ [key: string]: string }>({});
+
+    const [message, setMessage] = useState<string>("");
+
+    useEffect(() => {
+        axios.get('/main_api/marks/get_marks')
+            .then((response) => {
+                setStudents(response.data.students);
+                setSubjects(response.data.subjects);
+                setGrades(response.data.marks);
+            })
+            .catch((error) => {
+                console.log(error.message);
+                setMessage("Неизвестная ошибка")
+            })
+    }, [])
 
     // Функция обновления значения в input
     const handleGradeChange = (studentId: number, subjectId: number, value: string) => {
@@ -45,10 +42,14 @@ const GradeList: React.FC = () => {
     // Функция сохранения изменений
     const saveChanges = () => {
         console.log("Изменённые оценки:", editedGrades);
+        const new_grades = Object.entries(editedGrades).map((g) => new Object({"student_id": Number(g[0].split('-')[0]),"subject_id": Number(g[0].split('-')[1]), "value": Number(g[1])}))
+        axios.post('/main_api/marks/add_marks', new_grades)
+            .then((response) => setMessage(response.data.message))
+            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка"); return});
         setGrades(prevGrades =>
             prevGrades.map(g =>
-                editedGrades[`${g.studentId}-${g.subjectId}`] !== undefined
-                    ? { ...g, grade: Number(editedGrades[`${g.studentId}-${g.subjectId}`]) }
+                editedGrades[`${g.student_id}-${g.subject_id}`] !== undefined
+                    ? { ...g, value: Number(editedGrades[`${g.student_id}-${g.subject_id}`]) }
                     : g
             )
         );
@@ -57,7 +58,7 @@ const GradeList: React.FC = () => {
 
     return (
         <div style={{ padding: "20px" }}>
-            <Header />
+            <Header isAuth={isAuth} setisauth={setisauth} />
             <h1 style={{ fontWeight: "bold" }}>Список оценок</h1>
             <table style={{ borderCollapse: "collapse", width: "100%" }}>
                 <thead>
@@ -79,24 +80,27 @@ const GradeList: React.FC = () => {
                                 color: student.id === selectedStudentId ? "white" : "black",
                             }}
                         >
-                            <td style={{ border: "1px solid black", padding: "10px" }}>{student.name}</td>
+                            <td style={{ border: "1px solid black", padding: "10px" }}>{student.fio}</td>
                             {subjects.map(subject => {
-                                const grade = grades.find(g => g.studentId === student.id && g.subjectId === subject.id);
+                                const grade = grades.find(g => g.student_id === student.id && g.subject_id === subject.id);
                                 const inputValue =
                                     editedGrades[`${student.id}-${subject.id}`] !== undefined
                                         ? editedGrades[`${student.id}-${subject.id}`]
-                                        : grade?.grade ?? "-";
+                                        : grade?.value ?? "-";
 
                                 return (
                                     <td key={subject.id} style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
                                         <input
                                             type="number"
+                                            max="5"
+                                            min="1"
                                             value={inputValue}
                                             onChange={e => handleGradeChange(student.id, subject.id, e.target.value)}
                                             style={{
-                                                width: "50px",
+                                                width: "100%",
+                                                background: "none",
                                                 textAlign: "center",
-                                                border: "1px solid gray",
+                                                border: "none",
                                                 borderRadius: "4px",
                                                 padding: "5px",
                                             }}
@@ -108,7 +112,7 @@ const GradeList: React.FC = () => {
                     ))}
                 </tbody>
             </table>
-            <button
+            {isAuth && (<button
                 onClick={saveChanges}
                 style={{
                     marginTop: "20px",
@@ -122,7 +126,8 @@ const GradeList: React.FC = () => {
                 }}
             >
                 Сохранить изменения
-            </button>
+            </button>)}
+            <div>{message}</div>
         </div>
     );
 };

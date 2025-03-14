@@ -6,8 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authMiddleware = (req, res, next) => {
-    var _a;
-    const token = (_a = req.header("Authorization")) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+    const token = req.cookies.accessToken;
     if (!token) {
         res.status(401).json({ message: "Вы не авторизованны" });
         return;
@@ -17,7 +16,7 @@ const authMiddleware = (req, res, next) => {
         req.body.user = decoded;
         next();
     }
-    catch (_b) {
+    catch (_a) {
         res.status(403).json({ message: "Неправильный токен" });
     }
 };

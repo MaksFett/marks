@@ -33,6 +33,13 @@ userRoutes.post('/register', async (req: Request, res: Response) => {
             const {accessToken, refreshToken} = generateTokens(login);
             refreshTokens.push(refreshToken); 
     
+            res.cookie("accessToken", accessToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "strict",
+              maxAge: 60 * 60 * 1000,
+            });
+
             res.cookie("refreshToken", refreshToken, {
               httpOnly: true,
               secure: process.env.NODE_ENV === "production",
@@ -40,7 +47,7 @@ userRoutes.post('/register', async (req: Request, res: Response) => {
               maxAge: 7 * 24 * 60 * 60 * 1000,
             });
 
-            res.status(200).json({ accessToken });
+            res.status(200).json({ message: "Регистрация прошла успешно" });
           })
       })
   } catch (err) {
@@ -60,6 +67,13 @@ userRoutes.post('/login', async (req: Request, res: Response) => {
       const {accessToken, refreshToken} = generateTokens(login);
       refreshTokens.push(refreshToken); 
 
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 1000,
+      });
+
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -67,7 +81,7 @@ userRoutes.post('/login', async (req: Request, res: Response) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ accessToken })
+      res.status(200).json({ message: "Авторизация прошла успешно" })
     })
     .catch((err) => {
       console.log(err);
@@ -95,6 +109,13 @@ userRoutes.post('/refresh', (req: Request, res: Response): void => {
     refreshTokens = refreshTokens.filter(t => t !== token);
     refreshTokens.push(newRefreshToken);
 
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000,
+    });
+
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -102,20 +123,21 @@ userRoutes.post('/refresh', (req: Request, res: Response): void => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+    res.json({ message: "" });
   } catch (err) {
     res.status(403).json({ message: "Неправильный refresh-токен" });
   }
 });
 
 userRoutes.post('/logout', authMiddleware, (req: Request, res: Response) => {
+  res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
   refreshTokens = refreshTokens.filter(t => t !== req.cookies.refreshToken);
   res.json({ message: "Выход" });
 });
 
 userRoutes.get('/get_user', authMiddleware, async (req: Request, res: Response) => {
-  const { login } = req.body;
+  const { login } = req.body.user;
   knex1('users')
     .select("login", "email")
     .where({"login": login})
@@ -132,7 +154,7 @@ userRoutes.get('/get_user', authMiddleware, async (req: Request, res: Response) 
 
 userRoutes.get('/get_login', authMiddleware, (req: Request, res: Response) => {
   const login = req.body.user.login
-  res.status(200).json({ login });
+  res.status(200).json({ "login": login });
 });
 
 export default userRoutes;

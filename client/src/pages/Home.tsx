@@ -1,29 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
+import { AuthProps, IStudent } from "../types";
 import "../styles.css";
+import axios from "axios";
 
-const Home: React.FC = () => {
-    const [students, setStudents] = useState([
-        { id: 1, fullName: "Иванов Иван Иванович", group: "МК8-81Б", year: 2021 },
-        { id: 2, fullName: "Петров Петр Петрович", group: "ИУК2-22Б", year: 2022 },
-        { id: 3, fullName: "Сидоров Сидор Сидорович", group: "ИУК4-41Б", year: 2023 },
-    ]);
+const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+    const [students, setStudents] = useState<Array<IStudent>>([]);
 
     const [editingStudent, setEditingStudent] = useState<number | null>(null);
-    const [editedData, setEditedData] = useState<{ fullName: string; group: string; year: string }>({
-        fullName: "",
+    const [editedData, setEditedData] = useState<Omit<IStudent, "id">>({
+        fio: "",
         group: "",
-        year: "",
+        enter_year: 0,
     });
 
-    const [newStudent, setNewStudent] = useState<{ fullName: string; group: string; year: string }>({
-        fullName: "",
+    const [newStudent, setNewStudent] = useState<Omit<IStudent, "id">>({
+        fio: "",
         group: "",
-        year: "",
+        enter_year: 0,
     });
 
     const [isAddingNew, setIsAddingNew] = useState<boolean>(false); // Флаг для добавления нового студента
+    const [message, setMessage] = useState<string>("");
+
+    useEffect(() => {
+        axios.get('/main_api/students/get_students')
+            .then((response) => {setStudents(response.data); console.log(response)})
+            .catch((error) => {console.log(error.message); setMessage("Неизвестная оишбка")})
+    }, [])
 
     // Изменение значения в ячейке
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
@@ -40,9 +45,9 @@ const Home: React.FC = () => {
     const handleEdit = (student: any) => {
         setEditingStudent(student.id);
         setEditedData({
-            fullName: student.fullName,
+            fio: student.fio,
             group: student.group,
-            year: String(student.year),
+            enter_year: student.enter_year,
         });
         console.log(`Начато редактирование студента с ID: ${student.id}`);
     };
@@ -52,24 +57,30 @@ const Home: React.FC = () => {
         setStudents(
             students.map((student) =>
                 student.id === id
-                    ? { ...student, ...editedData, year: Number(editedData.year) }
+                    ? { ...student, ...editedData, enter_year: Number(editedData.enter_year) }
                     : student
             )
         );
+        axios.post('/main_api/students/edit_student', {id: id, ...editedData})
+            .then((response) => {setMessage(response.data.message)})
+            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")});
         setEditingStudent(null);
-        setEditedData({ fullName: "", group: "", year: "" });
+        setEditedData({ fio: "", group: "", enter_year: 0 });
         console.log(`Изменения сохранены для студента с ID: ${id}`);
     };
 
     // Отмена редактирования
     const handleCancel = () => {
         setEditingStudent(null);
-        setEditedData({ fullName: "", group: "", year: "" });
+        setEditedData({ fio: "", group: "", enter_year: 0 });
         console.log("Редактирование отменено");
     };
 
     // Удаление студента
     const handleDelete = (id: number) => {
+        axios.post('/main_api/students/delete_student', {"id": id})
+            .then((response) => {setMessage(response.data.message)})
+            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")})
         setStudents(students.filter((student) => student.id !== id));
         console.log(`Студент с ID: ${id} удален`);
     };
@@ -79,19 +90,22 @@ const Home: React.FC = () => {
         const newId = students.length > 0 ? Math.max(...students.map((student) => student.id)) + 1 : 1;
         const studentToAdd = {
             id: newId,
-            fullName: newStudent.fullName,
+            fio: newStudent.fio,
             group: newStudent.group,
-            year: Number(newStudent.year),
+            enter_year: Number(newStudent.enter_year),
         };
         setStudents([...students, studentToAdd]);
-        setNewStudent({ fullName: "", group: "", year: "" });
+        axios.post('/main_api/students/add_student', {id: newId, ...newStudent})
+            .then((response) => setMessage(response.data.message))
+            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")});
+        setNewStudent({ fio: "", group: "", enter_year: 0 });
         setIsAddingNew(false); // Закрытие строки добавления
-        console.log(`Добавлен новый студент: ${studentToAdd.fullName}`);
+        console.log(`Добавлен новый студент: ${studentToAdd.fio}`);
     };
 
     // Отмена добавления нового студента
     const handleCancelAdd = () => {
-        setNewStudent({ fullName: "", group: "", year: "" });
+        setNewStudent({ fio: "", group: "", enter_year: 0 });
         setIsAddingNew(false); // Закрытие строки добавления
         console.log("Добавление студента отменено");
     };
@@ -105,8 +119,8 @@ const Home: React.FC = () => {
                 <td>
                     <input
                         type="text"
-                        value={newStudent.fullName}
-                        onChange={(e) => handleNewStudentChange(e, "fullName")}
+                        value={newStudent.fio}
+                        onChange={(e) => handleNewStudentChange(e, "fio")}
                         placeholder="ФИО"
                         style={{ width: "100%" }}
                     />
@@ -123,8 +137,8 @@ const Home: React.FC = () => {
                 <td>
                     <input
                         type="number"
-                        value={newStudent.year}
-                        onChange={(e) => handleNewStudentChange(e, "year")}
+                        value={newStudent.enter_year}
+                        onChange={(e) => handleNewStudentChange(e, "enter_year")}
                         placeholder="Год поступления"
                         style={{ width: "100%" }}
                     />
@@ -143,9 +157,8 @@ const Home: React.FC = () => {
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <Header />
+            <Header isAuth={isAuth} setisauth={setisauth}/>
             <h1 style={{ fontWeight: "bold", textAlign: "center" }}>Список студентов</h1>
-
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
                 <thead>
                     <tr>
@@ -162,13 +175,13 @@ const Home: React.FC = () => {
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
-                                        value={editedData.fullName}
-                                        onChange={(e) => handleChange(e, "fullName")}
+                                        value={editedData.fio}
+                                        onChange={(e) => handleChange(e, "fio")}
                                         style={{ width: "100%" }}
                                     />
                                 ) : (
                                     <Link to={`/grades/${student.id}`} style={{ textDecoration: "underline", color: "black" }}>
-                                        {student.fullName}
+                                        {student.fio}
                                     </Link>
                                 )}
                             </td>
@@ -188,16 +201,16 @@ const Home: React.FC = () => {
                                 {editingStudent === student.id ? (
                                     <input
                                         type="number"
-                                        value={editedData.year}
-                                        onChange={(e) => handleChange(e, "year")}
+                                        value={editedData.enter_year}
+                                        onChange={(e) => handleChange(e, "enter_year")}
                                         style={{ textAlign: "center", width: "100%" }}
                                     />
                                 ) : (
-                                    student.year
+                                    student.enter_year
                                 )}
                             </td>
                             <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
-                                {editingStudent === student.id ? (
+                                {isAuth ? (editingStudent === student.id ? (
                                     <>
                                         <button
                                             onClick={() => handleSave(student.id)}
@@ -231,7 +244,7 @@ const Home: React.FC = () => {
                                             ❌
                                         </button>
                                     </>
-                                )}
+                                )) : <></>}
                             </td>
                         </tr>
                     ))}
@@ -240,7 +253,7 @@ const Home: React.FC = () => {
             </table>
 
             {/* Кнопка для добавления нового студента */}
-            {!isAddingNew && (
+            {!isAddingNew && isAuth && (
                 <button onClick={() => setIsAddingNew(true)} style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}>
                     Добавить студента
                 </button>

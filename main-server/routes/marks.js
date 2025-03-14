@@ -8,7 +8,7 @@ const knex_1 = __importDefault(require("knex"));
 const markRoutes = express_1.default.Router();
 const knex1 = (0, knex_1.default)(require('../knexfile.js').development);
 markRoutes.get('/get_marks', (_req, res) => {
-    var full_marks = [];
+    var full_marks;
     knex1('marks')
         .select("student_id", "subject_id", "value")
         .then(marks => {
@@ -37,7 +37,7 @@ markRoutes.get('/get_marks', (_req, res) => {
     });
 });
 markRoutes.post('/add_marks', (req, res) => {
-    const marks = req.body.marks;
+    const marks = req.body;
     knex1('marks')
         .insert(marks)
         .onConflict("student_id-subject_id")

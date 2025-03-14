@@ -35,9 +35,9 @@
 }
 
 .navList li button.logout-btn {
-    background-color: #007bff;
+    background-color: 0;
     border: none;
-    padding: 5px 15px;
+    padding: 0;
     color: white;
     font-size: 18px;
     cursor: pointer;
