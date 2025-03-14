@@ -258,6 +258,8 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
                     Добавить студента
                 </button>
             )}
+
+            {message !== "" ? <div>{message}</div> : <div>&nbsp;</div>}
         </div>
     );
 };
