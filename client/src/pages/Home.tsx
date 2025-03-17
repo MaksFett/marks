@@ -1,102 +1,76 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
+import { IStudent } from "../types";
 import "../styles.css";
+import { studentStore } from "../stores/StudentStore"; // Import the MobX store
 
-const Home: React.FC = () => {
-    const [students, setStudents] = useState([
-        { id: 1, fullName: "Иванов Иван Иванович", group: "МК8-81Б", year: 2021 },
-        { id: 2, fullName: "Петров Петр Петрович", group: "ИУК2-22Б", year: 2022 },
-        { id: 3, fullName: "Сидоров Сидор Сидорович", group: "ИУК4-41Б", year: 2023 },
-    ]);
+const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
+    const { students, message, isLoading, fetchStudents, editStudent, deleteStudent, addStudent } = studentStore;
 
-    const [editingStudent, setEditingStudent] = useState<number | null>(null);
-    const [editedData, setEditedData] = useState<{ fullName: string; group: string; year: string }>({
-        fullName: "",
+    useEffect(() => {
+        fetchStudents(); // Fetch students when the component is mounted
+    }, [fetchStudents]);
+
+    const [editingStudent, setEditingStudent] = React.useState<number | null>(null);
+    const [editedData, setEditedData] = React.useState<Omit<IStudent, "id">>({
+        fio: "",
         group: "",
-        year: "",
+        enter_year: 0,
     });
 
-    const [newStudent, setNewStudent] = useState<{ fullName: string; group: string; year: string }>({
-        fullName: "",
+    const [newStudent, setNewStudent] = React.useState<Omit<IStudent, "id">>({
+        fio: "",
         group: "",
-        year: "",
+        enter_year: 0,
     });
 
-    const [isAddingNew, setIsAddingNew] = useState<boolean>(false); // Флаг для добавления нового студента
+    const [isAddingNew, setIsAddingNew] = React.useState<boolean>(false);
 
-    // Изменение значения в ячейке
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         setEditedData({ ...editedData, [field]: e.target.value });
-        console.log(`Изменено поле ${field}: ${e.target.value}`); // Лог изменений
     };
 
-    // Изменение значения для нового студента
     const handleNewStudentChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         setNewStudent({ ...newStudent, [field]: e.target.value });
     };
 
-    // Редактирование студента
-    const handleEdit = (student: any) => {
+    const handleEdit = (student: IStudent) => {
         setEditingStudent(student.id);
         setEditedData({
-            fullName: student.fullName,
+            fio: student.fio,
             group: student.group,
-            year: String(student.year),
+            enter_year: student.enter_year,
         });
-        console.log(`Начато редактирование студента с ID: ${student.id}`);
     };
 
-    // Сохранение изменений
     const handleSave = (id: number) => {
-        setStudents(
-            students.map((student) =>
-                student.id === id
-                    ? { ...student, ...editedData, year: Number(editedData.year) }
-                    : student
-            )
-        );
+        editStudent(id, editedData);
         setEditingStudent(null);
-        setEditedData({ fullName: "", group: "", year: "" });
-        console.log(`Изменения сохранены для студента с ID: ${id}`);
+        setEditedData({ fio: "", group: "", enter_year: 0 });
     };
 
-    // Отмена редактирования
     const handleCancel = () => {
         setEditingStudent(null);
-        setEditedData({ fullName: "", group: "", year: "" });
-        console.log("Редактирование отменено");
+        setEditedData({ fio: "", group: "", enter_year: 0 });
     };
 
-    // Удаление студента
     const handleDelete = (id: number) => {
-        setStudents(students.filter((student) => student.id !== id));
-        console.log(`Студент с ID: ${id} удален`);
+        deleteStudent(id);
     };
 
-    // Добавление нового студента
     const handleAddStudent = () => {
-        const newId = students.length > 0 ? Math.max(...students.map((student) => student.id)) + 1 : 1;
-        const studentToAdd = {
-            id: newId,
-            fullName: newStudent.fullName,
-            group: newStudent.group,
-            year: Number(newStudent.year),
-        };
-        setStudents([...students, studentToAdd]);
-        setNewStudent({ fullName: "", group: "", year: "" });
-        setIsAddingNew(false); // Закрытие строки добавления
-        console.log(`Добавлен новый студент: ${studentToAdd.fullName}`);
+        addStudent(newStudent);
+        setNewStudent({ fio: "", group: "", enter_year: 0 });
+        setIsAddingNew(false);
     };
 
-    // Отмена добавления нового студента
     const handleCancelAdd = () => {
-        setNewStudent({ fullName: "", group: "", year: "" });
-        setIsAddingNew(false); // Закрытие строки добавления
-        console.log("Добавление студента отменено");
+        setNewStudent({ fio: "", group: "", enter_year: 0 });
+        setIsAddingNew(false);
     };
 
-    // Отображение пустой строки для добавления студента
     const renderAddRow = () => {
         if (!isAddingNew) return null;
 
@@ -105,8 +79,8 @@ const Home: React.FC = () => {
                 <td>
                     <input
                         type="text"
-                        value={newStudent.fullName}
-                        onChange={(e) => handleNewStudentChange(e, "fullName")}
+                        value={newStudent.fio}
+                        onChange={(e) => handleNewStudentChange(e, "fio")}
                         placeholder="ФИО"
                         style={{ width: "100%" }}
                     />
@@ -123,19 +97,15 @@ const Home: React.FC = () => {
                 <td>
                     <input
                         type="number"
-                        value={newStudent.year}
-                        onChange={(e) => handleNewStudentChange(e, "year")}
+                        value={newStudent.enter_year}
+                        onChange={(e) => handleNewStudentChange(e, "enter_year")}
                         placeholder="Год поступления"
                         style={{ width: "100%" }}
                     />
                 </td>
                 <td>
-                    <button onClick={handleAddStudent} style={{ padding: "5px 10px", cursor: "pointer", marginBottom: "10px", marginTop: "10px"}}>
-                        Сохранить
-                    </button>
-                    <button onClick={handleCancelAdd} style={{ padding: "5px 10px", cursor: "pointer" }}>
-                        Отмена
-                    </button>
+                    <button onClick={handleAddStudent}>Сохранить</button>
+                    <button onClick={handleCancelAdd}>Отмена</button>
                 </td>
             </tr>
         );
@@ -143,9 +113,8 @@ const Home: React.FC = () => {
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <Header />
+            <Header isAuth={isAuth} setisauth={setisauth} />
             <h1 style={{ fontWeight: "bold", textAlign: "center" }}>Список студентов</h1>
-
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
                 <thead>
                     <tr>
@@ -158,78 +127,55 @@ const Home: React.FC = () => {
                 <tbody>
                     {students.map((student) => (
                         <tr key={student.id}>
-                            <td style={{ border: "1px solid black", padding: "10px" }}>
+                            <td>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
-                                        value={editedData.fullName}
-                                        onChange={(e) => handleChange(e, "fullName")}
-                                        style={{ width: "100%" }}
+                                        value={editedData.fio}
+                                        onChange={(e) => handleChange(e, "fio")}
                                     />
                                 ) : (
-                                    <Link to={`/grades/${student.id}`} style={{ textDecoration: "underline", color: "black" }}>
-                                        {student.fullName}
+                                    <Link to={`/grades/${student.id}`} style={{ textDecoration: "underline" }}>
+                                        {student.fio}
                                     </Link>
                                 )}
                             </td>
-                            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+                            <td>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
                                         value={editedData.group}
                                         onChange={(e) => handleChange(e, "group")}
-                                        style={{ textAlign: "center", width: "100%" }}
                                     />
                                 ) : (
                                     student.group
                                 )}
                             </td>
-                            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+                            <td>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="number"
-                                        value={editedData.year}
-                                        onChange={(e) => handleChange(e, "year")}
-                                        style={{ textAlign: "center", width: "100%" }}
+                                        value={editedData.enter_year}
+                                        onChange={(e) => handleChange(e, "enter_year")}
                                     />
                                 ) : (
-                                    student.year
+                                    student.enter_year
                                 )}
                             </td>
-                            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
-                                {editingStudent === student.id ? (
+                            <td>
+                                {isAuth && (
                                     <>
-                                        <button
-                                            onClick={() => handleSave(student.id)}
-                                            style={{
-                                                marginRight: "15px",
-                                                padding: "5px 10px",
-                                                cursor: "pointer",
-                                                marginBottom: "10px", 
-                                                marginTop: "10px",
-                                                marginLeft: "20px"
-                                            }}
-                                        >
-                                            Сохранить
-                                        </button>
-                                        <button
-                                            onClick={handleCancel}
-                                            style={{
-                                                padding: "5px 10px",
-                                                cursor: "pointer",
-                                            }}
-                                        >
-                                            Отмена
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button onClick={() => handleEdit(student)} style={{ marginRight: "5px" }}>
-                                            ✏️
-                                        </button>
-                                        <button onClick={() => handleDelete(student.id)} style={{ marginLeft: "5px" }}>
-                                            ❌
-                                        </button>
+                                        {editingStudent === student.id ? (
+                                            <>
+                                                <button onClick={() => handleSave(student.id)}>Сохранить</button>
+                                                <button onClick={handleCancel}>Отмена</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => handleEdit(student)}>✏️</button>
+                                                <button onClick={() => handleDelete(student.id)}>❌</button>
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </td>
@@ -239,14 +185,13 @@ const Home: React.FC = () => {
                 </tbody>
             </table>
 
-            {/* Кнопка для добавления нового студента */}
-            {!isAddingNew && (
-                <button onClick={() => setIsAddingNew(true)} style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}>
-                    Добавить студента
-                </button>
+            {!isAddingNew && isAuth && (
+                <button onClick={() => setIsAddingNew(true)}>Добавить студента</button>
             )}
+
+            {message && <div>{message}</div>}
         </div>
     );
 };
 
-export default Home;
+export default observer(Home); // Use observer to make the component reactive to MobX store changes

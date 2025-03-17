@@ -1,36 +1,33 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { IUser } from "../types";
+import React, { useEffect } from "react";
+import { observer } from "mobx-react-lite"; // Оборачивание компонента в observer
 import { useNavigate } from "react-router-dom";
+import userStore from "../stores/UserStore"; 
 import Header from "../components/Header";
 
-const Profile: React.FC = () => {
-    const [user, setUser] = useState<IUser | null>(null);
+const Profile: React.FC = observer(() => {
+    const { user, isAuth, fetchUser } = userStore; // Извлекаем состояние из store
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("http://localhost:3000/api/me", { withCredentials: true })
-            .then((response) => setUser(response.data))
-            .catch(() => setUser(null));
-    }, []);
+        const loadUser = async () => {
+            await fetchUser(); 
+            if (!isAuth) {
+                navigate("/login"); // Если пользователь не авторизован, перенаправляем на страницу входа
+            }
+        };
+        loadUser();
+    }, [isAuth, fetchUser, navigate]);
 
-    useEffect(() => {
-        if (!user) {
-            // Если нет пользователя, перенаправляем на страницу регистрации
-            navigate("/register");
-        }
-    }, [user, navigate]);
-
-    if (!user) return null; 
+    if (!user) return <div>Загрузка...</div>; 
 
     return (
         <div>
-            <Header />
+            <Header isAuth={isAuth} setisauth={userStore.logout} />
             <h1>Личный кабинет</h1>
             <p><strong>Здравствуйте,</strong> {user.login}</p>
             <p><strong>Ваш Email:</strong> {user.email}</p>
         </div>
     );
-};
+});
 
 export default Profile;

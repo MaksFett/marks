@@ -1,12 +1,15 @@
 import React from "react";
+import { observer } from "mobx-react-lite";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
-import { useFormik } from "formik";
+import { authStore } from "../stores/AuthStore";
 import * as Yup from "yup";
+import { IUser } from "../types";
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
+    const { login, email, password, message, isLoading, setLogin, setEmail, setPassword, registerUser, clearMessage } = authStore;
 
+    // Валидация формы
     const validationSchema = Yup.object({
         login: Yup.string().required("Логин обязателен"),
         email: Yup.string()
@@ -17,72 +20,71 @@ const Register: React.FC = () => {
             .required("Пароль обязателен"),
     });
 
-    const formik = useFormik({
-        initialValues: {
-            login: "",
-            email: "",
-            password: "",
-        },
-        validationSchema,
-        validateOnBlur: true,  // <-- добавлено
-        validateOnChange: true, 
-        onSubmit: async (values) => {
-            try {
-                await axios.post("http://localhost:3000/user_api/users", values);
-                navigate("/login");
-            } catch (error) {
-                console.error("Ошибка регистрации", error);
-            }
-        },
-    });
+    // Обработчик отправки формы
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const isSuccess = await registerUser();
+        if (isSuccess) {
+            navigate("/");
+        }
+    };
+
+    const isFormValid = login && email && password && !isLoading;
 
     return (
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={handleSubmit}>
             <h2>Регистрация</h2>
 
             <input
                 type="text"
-                name="login"
                 placeholder="Логин"
-                value={formik.values.login}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={login}
+                onChange={(e) => {
+                    setLogin(e.target.value);
+                    clearMessage();
+                }}
             />
-            {formik.touched.login && formik.errors.login && <div style={{ color: "red" }}>{formik.errors.login}</div>}
+            {!login && <div style={{ color: "red" }}>Логин обязателен</div>}
 
             <input
                 type="email"
-                name="email"
                 placeholder="Email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={email}
+                onChange={(e) => {
+                    setEmail(e.target.value);
+                    clearMessage();
+                }}
             />
-            {formik.touched.email && formik.errors.email && <div style={{ color: "red" }}>{formik.errors.email}</div>}
+            {!email && <div style={{ color: "red" }}>Email обязателен</div>}
 
             <input
                 type="password"
-                name="password"
                 placeholder="Пароль"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={password}
+                onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearMessage();
+                }}
             />
-            {formik.touched.password && formik.errors.password && <div style={{ color: "red" }}>{formik.errors.password}</div>}
+            {!password && <div style={{ color: "red" }}>Пароль обязателен</div>}
 
-            <button type="submit" disabled={!(formik.isValid && formik.dirty)} style={{
-                backgroundColor: formik.isValid && formik.dirty ? "#007bff" : "#ccc",
-                cursor: formik.isValid && formik.dirty ? "pointer" : "not-allowed",
-            }}>
+            <button
+                type="submit"
+                disabled={!isFormValid}
+                style={{
+                    backgroundColor: isFormValid ? "#007bff" : "#ccc",
+                    cursor: isFormValid ? "pointer" : "not-allowed",
+                }}
+            >
                 Зарегистрироваться
             </button>
-
 
             <p>
                 Уже есть аккаунт? <Link to="/login">Войдите</Link>
             </p>
+            {message && <div>{message}</div>}
         </form>
     );
 };
 
-export default Register;
+export default observer(Register);

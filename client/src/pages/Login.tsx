@@ -1,20 +1,17 @@
-import { useState } from "react";
+import React from "react";
+import { observer } from "mobx-react-lite";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { authStore } from "../stores/AuthStore";
 
-const Login = () => {
-    const [login, setLogin] = useState("");
-    const [password, setPassword] = useState("");
+const Login: React.FC = () => {
     const navigate = useNavigate();
+    const { login, password, message, isLoading, setLogin, setPassword, loginUser, clearMessage } = authStore;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await axios.post("http://localhost:3000/user_api/login", { login, password });
-            localStorage.setItem("token", response.data.token);
+        const isSuccess = await loginUser();
+        if (isSuccess) {
             navigate("/");
-        } catch (error) {
-            console.error("Ошибка входа", error);
         }
     };
 
@@ -28,17 +25,23 @@ const Login = () => {
                 type="text"
                 placeholder="Логин"
                 value={login}
-                onChange={(e) => setLogin(e.target.value)}
+                onChange={(e) => {
+                    setLogin(e.target.value);
+                    clearMessage(); // очищаем сообщение при изменении данных
+                }}
             />
             <input
                 type="password"
                 placeholder="Пароль"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearMessage(); // очищаем сообщение при изменении данных
+                }}
             />
             <button
                 type="submit"
-                disabled={!isFormValid}
+                disabled={!isFormValid || isLoading}
                 style={{
                     backgroundColor: isFormValid ? "#007bff" : "#ccc",
                     cursor: isFormValid ? "pointer" : "not-allowed",
@@ -49,8 +52,9 @@ const Login = () => {
             <p>
                 Нет аккаунта? <Link to="/register">Зарегистрируйтесь</Link>
             </p>
+            {message && <div>{message}</div>}
         </form>
     );
 };
 
-export default Login;
+export default observer(Login);

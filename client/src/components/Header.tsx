@@ -1,17 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../Header.css"; // Импортируем CSS-файл
+import { observer } from "mobx-react-lite";
+import { useStore } from "../store/StoreProvider";
+import "../Header.css";
+import axios from "axios";
 
-const Header: React.FC = () => {
+const Header: React.FC = observer(() => {
+    const { userStore } = useStore();
     const navigate = useNavigate();
-    
-    // Проверяем наличие токена в localStorage
-    const isAuthenticated = !!localStorage.getItem("token");
 
-    const handleLogout = () => {
-        // Удаляем токен из localStorage при выходе
-        localStorage.removeItem("token");
-        navigate("/"); // Перенаправляем на главную страницу
+    useEffect(() => {
+        userStore.checkAuth();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('/user_api/users/logout');
+            userStore.logout();
+            navigate("/"); // Перенаправляем на главную страницу
+        } catch (error) {
+            console.error("Ошибка при выходе", error);
+        }
     };
 
     return (
@@ -20,10 +29,14 @@ const Header: React.FC = () => {
                 <ul className="navList">
                     <li><Link to="/">Главная</Link></li>
                     <li><Link to="/grades">Список оценок</Link></li>
-                    <li><Link to="/profile">Личный кабинет</Link></li>
-                    {/* Если пользователь авторизован, показываем "Выход", иначе "Вход" и "Регистрация" */}
-                    {isAuthenticated ? (
-                        <li><button className="logout-btn" onClick={handleLogout}>Выход</button></li>
+                    {userStore.isAuth ? (
+                        <>
+                            <li><Link to="/profile">Личный кабинет</Link></li>
+                            <li>
+                                <span>Здравствуйте, {userStore.user?.login}</span> {/* Показываем имя пользователя */}
+                            </li>
+                            <li><button className="logout-btn" onClick={handleLogout}>Выход</button></li>
+                        </>
                     ) : (
                         <>
                             <li><Link to="/login">Вход</Link></li>
@@ -34,6 +47,6 @@ const Header: React.FC = () => {
             </nav>
         </header>
     );
-};
+});
 
 export default Header;
