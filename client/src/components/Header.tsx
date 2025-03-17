@@ -1,26 +1,20 @@
+// components/Header.tsx
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { observer } from "mobx-react-lite";
-import { useStore } from "../store/StoreProvider";
+import { observer } from "mobx-react-lite"; // Для реакции на изменения в store
+import { userStore } from "../store/UserStore"; // Подключаем наш store
 import "../Header.css";
-import axios from "axios";
 
 const Header: React.FC = observer(() => {
-    const { userStore } = useStore();
     const navigate = useNavigate();
 
     useEffect(() => {
-        userStore.checkAuth();
+        userStore.checkAuthStatus(); // Проверяем статус авторизации при загрузке компонента
     }, []);
 
     const handleLogout = async () => {
-        try {
-            await axios.post('/user_api/users/logout');
-            userStore.logout();
-            navigate("/"); // Перенаправляем на главную страницу
-        } catch (error) {
-            console.error("Ошибка при выходе", error);
-        }
+        await userStore.logout();
+        navigate("/"); // Перенаправляем на главную страницу
     };
 
     return (
@@ -29,12 +23,11 @@ const Header: React.FC = observer(() => {
                 <ul className="navList">
                     <li><Link to="/">Главная</Link></li>
                     <li><Link to="/grades">Список оценок</Link></li>
+                    {/* Если пользователь авторизован, показываем "Выход" и имя, иначе "Вход" и "Регистрация" */}
                     {userStore.isAuth ? (
                         <>
                             <li><Link to="/profile">Личный кабинет</Link></li>
-                            <li>
-                                <span>Здравствуйте, {userStore.user?.login}</span> {/* Показываем имя пользователя */}
-                            </li>
+                            <li>Привет, {userStore.user?.name}</li> {/* Отображаем имя пользователя */}
                             <li><button className="logout-btn" onClick={handleLogout}>Выход</button></li>
                         </>
                     ) : (

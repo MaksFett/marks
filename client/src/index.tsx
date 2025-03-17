@@ -2,11 +2,14 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import './index.css';
 import App from './app';
-import { StoreProvider } from "./store/StoreProvider";
+import { userStore } from "./store/UserStore";
+import { observer } from "mobx-react-lite";
+
+const Root = observer(() => <App />);
 
 ReactDOM.render(
-    <StoreProvider>
-        <App />
-    </StoreProvider>,
+    <React.StrictMode>
+        <Root />
+    </React.StrictMode>,
     document.getElementById("root")
 );

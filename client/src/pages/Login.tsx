@@ -1,16 +1,16 @@
-import React from "react";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { authStore } from "../stores/AuthStore";
+import { userStore } from "../store/UserStore";
 
-const Login: React.FC = () => {
+const Login = observer(() => {
+    const { login, password, message, setLogin, setPassword, setMessage, loginUser } = userStore;
     const navigate = useNavigate();
-    const { login, password, message, isLoading, setLogin, setPassword, loginUser, clearMessage } = authStore;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const isSuccess = await loginUser();
-        if (isSuccess) {
+        await loginUser();
+        if (userStore.isAuth) {
             navigate("/");
         }
     };
@@ -25,23 +25,17 @@ const Login: React.FC = () => {
                 type="text"
                 placeholder="Логин"
                 value={login}
-                onChange={(e) => {
-                    setLogin(e.target.value);
-                    clearMessage(); // очищаем сообщение при изменении данных
-                }}
+                onChange={(e) => setLogin(e.target.value)}
             />
             <input
                 type="password"
                 placeholder="Пароль"
                 value={password}
-                onChange={(e) => {
-                    setPassword(e.target.value);
-                    clearMessage(); // очищаем сообщение при изменении данных
-                }}
+                onChange={(e) => setPassword(e.target.value)}
             />
             <button
                 type="submit"
-                disabled={!isFormValid || isLoading}
+                disabled={!isFormValid}
                 style={{
                     backgroundColor: isFormValid ? "#007bff" : "#ccc",
                     cursor: isFormValid ? "pointer" : "not-allowed",
@@ -52,9 +46,9 @@ const Login: React.FC = () => {
             <p>
                 Нет аккаунта? <Link to="/register">Зарегистрируйтесь</Link>
             </p>
-            {message && <div>{message}</div>}
+            {message !== "" ? <div>{message}</div> : <div>&nbsp;</div>}
         </form>
     );
-};
+});
 
-export default observer(Login);
+export default Login;

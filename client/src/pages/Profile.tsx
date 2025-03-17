@@ -1,31 +1,27 @@
-import React, { useEffect } from "react";
-import { observer } from "mobx-react-lite"; // Оборачивание компонента в observer
-import { useNavigate } from "react-router-dom";
-import userStore from "../stores/UserStore"; 
-import Header from "../components/Header";
+import { observer } from "mobx-react-lite";
+import { userStore } from "../store/UserStore";
+import { useEffect } from "react";
 
-const Profile: React.FC = observer(() => {
-    const { user, isAuth, fetchUser } = userStore; // Извлекаем состояние из store
-    const navigate = useNavigate();
-
+const Profile = observer(() => {
     useEffect(() => {
-        const loadUser = async () => {
-            await fetchUser(); 
-            if (!isAuth) {
-                navigate("/login"); // Если пользователь не авторизован, перенаправляем на страницу входа
-            }
-        };
-        loadUser();
-    }, [isAuth, fetchUser, navigate]);
+        userStore.fetchUser();
+    }, []);
 
-    if (!user) return <div>Загрузка...</div>; 
+    if (userStore.isLoading) {
+        return <p>Загрузка...</p>;
+    }
 
     return (
         <div>
-            <Header isAuth={isAuth} setisauth={userStore.logout} />
-            <h1>Личный кабинет</h1>
-            <p><strong>Здравствуйте,</strong> {user.login}</p>
-            <p><strong>Ваш Email:</strong> {user.email}</p>
+            <h1>Профиль</h1>
+            {userStore.user ? (
+                <>
+                    <p>Имя: {userStore.user.name}</p>
+                    <p>Email: {userStore.user.email}</p>
+                </>
+            ) : (
+                <p>Нет данных о пользователе</p>
+            )}
         </div>
     );
 });

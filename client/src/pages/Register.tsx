@@ -1,15 +1,15 @@
-import React from "react";
-import { observer } from "mobx-react-lite";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { authStore } from "../stores/AuthStore";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import { IUser } from "../types";
+import { observer } from "mobx-react-lite";
+import { userStore } from "../store/UserStore";  // Импортируем хранилище
 
-const Register: React.FC = () => {
+const Register: React.FC = observer(() => {
     const navigate = useNavigate();
-    const { login, email, password, message, isLoading, setLogin, setEmail, setPassword, registerUser, clearMessage } = authStore;
+    const [message, setMessage] = useState<string>("");
 
-    // Валидация формы
     const validationSchema = Yup.object({
         login: Yup.string().required("Логин обязателен"),
         email: Yup.string()
@@ -20,71 +20,70 @@ const Register: React.FC = () => {
             .required("Пароль обязателен"),
     });
 
-    // Обработчик отправки формы
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const isSuccess = await registerUser();
-        if (isSuccess) {
-            navigate("/");
-        }
-    };
-
-    const isFormValid = login && email && password && !isLoading;
+    const formik = useFormik({
+        initialValues: {
+            login: "",
+            email: "",
+            password: "",
+        },
+        validationSchema,
+        validateOnBlur: true,
+        validateOnChange: true,
+        onSubmit: async (values: IUser) => {
+            await userStore.registerUser(values); // Используем MobX для регистрации
+            if (!userStore.message) {
+                navigate("/");  // Переход на главную страницу, если нет ошибок
+            }
+        },
+    });
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={formik.handleSubmit}>
             <h2>Регистрация</h2>
 
             <input
                 type="text"
+                name="login"
                 placeholder="Логин"
-                value={login}
-                onChange={(e) => {
-                    setLogin(e.target.value);
-                    clearMessage();
-                }}
+                value={formik.values.login}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
             />
-            {!login && <div style={{ color: "red" }}>Логин обязателен</div>}
+            {formik.touched.login && formik.errors.login && <div style={{ color: "red" }}>{formik.errors.login}</div>}
 
             <input
                 type="email"
+                name="email"
                 placeholder="Email"
-                value={email}
-                onChange={(e) => {
-                    setEmail(e.target.value);
-                    clearMessage();
-                }}
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
             />
-            {!email && <div style={{ color: "red" }}>Email обязателен</div>}
+            {formik.touched.email && formik.errors.email && <div style={{ color: "red" }}>{formik.errors.email}</div>}
 
             <input
                 type="password"
+                name="password"
                 placeholder="Пароль"
-                value={password}
-                onChange={(e) => {
-                    setPassword(e.target.value);
-                    clearMessage();
-                }}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
             />
-            {!password && <div style={{ color: "red" }}>Пароль обязателен</div>}
+            {formik.touched.password && formik.errors.password && <div style={{ color: "red" }}>{formik.errors.password}</div>}
 
-            <button
-                type="submit"
-                disabled={!isFormValid}
-                style={{
-                    backgroundColor: isFormValid ? "#007bff" : "#ccc",
-                    cursor: isFormValid ? "pointer" : "not-allowed",
-                }}
-            >
+            <button type="submit" disabled={!(formik.isValid && formik.dirty)} style={{
+                backgroundColor: formik.isValid && formik.dirty ? "#007bff" : "#ccc",
+                cursor: formik.isValid && formik.dirty ? "pointer" : "not-allowed",
+            }}>
                 Зарегистрироваться
             </button>
 
             <p>
                 Уже есть аккаунт? <Link to="/login">Войдите</Link>
             </p>
-            {message && <div>{message}</div>}
+            {userStore.message && <div style={{ color: "red" }}>{userStore.message}</div>}  {/* Отображаем сообщение об ошибке из MobX */}
         </form>
     );
-};
+});
 
-export default observer(Register);
+export default Register;

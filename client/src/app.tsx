@@ -14,12 +14,12 @@ const App: React.FC = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home isAuth={isAuth} setisauth={setisauth}/>} />
+                <Route path="/" element={<Home />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/profile" element={<Profile isAuth={isAuth} setisauth={setisauth}/>} />
-                <Route path="/grades" element={<GradeList isAuth={isAuth} setisauth={setisauth}/>} />
-                <Route path="/grades/:id" element={<GradeList isAuth={isAuth} setisauth={setisauth}/>} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/grades" element={<GradeList />} />
+                <Route path="/grades/:id" element={<GradeList />} />
             </Routes>
         </Router>
     );
