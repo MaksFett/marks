@@ -2,7 +2,7 @@ export type IUser = {
     login: string;
     email: string;
     password: string;
-}
+} | null
 
 export type IShortUser = Omit<IUser, "password">
 

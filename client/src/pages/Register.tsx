@@ -1,7 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate, Link } from "react-router-dom";
-import { authStore } from "../stores/AuthStore";
+import { authStore } from "../stores/Register";
 import * as Yup from "yup";
 import { IUser } from "../types";
 

@@ -5,9 +5,11 @@ import Header from "../components/Header";
 import { IStudent } from "../types";
 import "../styles.css";
 import { studentStore } from "../stores/StudentStore"; // Import the MobX store
+import userStore from "../stores/UserStore";
 
-const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
+const Home: React.FC = () => {
     const { students, message, isLoading, fetchStudents, editStudent, deleteStudent, addStudent } = studentStore;
+    const { isAuth } = userStore;
 
     useEffect(() => {
         fetchStudents(); // Fetch students when the component is mounted
@@ -113,7 +115,7 @@ const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <Header isAuth={isAuth} setisauth={setisauth} />
+            <Header />
             <h1 style={{ fontWeight: "bold", textAlign: "center" }}>Список студентов</h1>
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
                 <thead>
@@ -127,7 +129,7 @@ const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
                 <tbody>
                     {students.map((student) => (
                         <tr key={student.id}>
-                            <td>
+                            <td style={{ border: "1px solid black", padding: "10px" }}>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
@@ -140,7 +142,7 @@ const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
                                     </Link>
                                 )}
                             </td>
-                            <td>
+                            <td style={{ border: "1px solid black", padding: "10px" }}>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
@@ -151,7 +153,7 @@ const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
                                     student.group
                                 )}
                             </td>
-                            <td>
+                            <td style={{ border: "1px solid black", padding: "10px" }}>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="number"
@@ -162,22 +164,42 @@ const Home: React.FC<AuthProps> = ({ isAuth, setisauth }) => {
                                     student.enter_year
                                 )}
                             </td>
-                            <td>
-                                {isAuth && (
+                            <td style={{ border: "1px solid black", padding: "10px" }}>
+                                {isAuth ? (editingStudent === student.id ? (
                                     <>
-                                        {editingStudent === student.id ? (
-                                            <>
-                                                <button onClick={() => handleSave(student.id)}>Сохранить</button>
-                                                <button onClick={handleCancel}>Отмена</button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => handleEdit(student)}>✏️</button>
-                                                <button onClick={() => handleDelete(student.id)}>❌</button>
-                                            </>
-                                        )}
+                                        <button
+                                            onClick={() => handleSave(student.id)}
+                                            style={{
+                                                marginRight: "15px",
+                                                padding: "5px 10px",
+                                                cursor: "pointer",
+                                                marginBottom: "10px", 
+                                                marginTop: "10px",
+                                                marginLeft: "20px"
+                                            }}
+                                        >
+                                            Сохранить
+                                        </button>
+                                        <button
+                                            onClick={handleCancel}
+                                            style={{
+                                                padding: "5px 10px",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            Отмена
+                                        </button>
                                     </>
-                                )}
+                                ) : (
+                                    <>
+                                        <button onClick={() => handleEdit(student)} style={{ marginRight: "5px" }}>
+                                            ✏️
+                                        </button>
+                                        <button onClick={() => handleDelete(student.id)} style={{ marginLeft: "5px" }}>
+                                            ❌
+                                        </button>
+                                    </>
+                                )) : <></>}
                             </td>
                         </tr>
                     ))}

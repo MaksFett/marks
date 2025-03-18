@@ -1,29 +1,26 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import axios, { AxiosError } from "axios"; // Импортируем AxiosError для типизации ошибки
+import { IUser } from "../types";
 
 class UserStore {
-    isAuth = false;
-    user = null;
-    isLoading = false;
+    isAuth: boolean = false;
+    user: IUser = null;
+    isLoading: boolean = false;
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    async checkAuth() {
-        if (this.user) {
-            // Данные уже загружены, нет нужды запрашивать их повторно
-            return;
-        }
-        try {
-            await axios.get("/user_api/users/get_login");
-            this.isAuth = true;
-        } catch (error) {
-            if (this.isAxiosError(error)) { // Проверяем, является ли ошибка экземпляром AxiosError
+    checkAuth = async () => {
+        await axios.get("/user_api/users/get_login")
+        .then(() => this.isAuth = true )
+        .catch((error) => {
+            if ((error as AxiosError).response !== undefined) { // Проверяем, является ли ошибка экземпляром AxiosError
                 if (error.response?.status === 401) {
                     try {
-                        await axios.post("/user_api/users/refresh");
+                        axios.post("/user_api/users/refresh");
                         this.isAuth = true;
+                        console.log(this.isAuth)
                     } catch {
                         this.isAuth = false;
                     }
@@ -33,34 +30,29 @@ class UserStore {
             } else {
                 console.error("Неизвестная ошибка:", error);
             }
-        }
+        })
     }
 
-    async fetchUser() {
-        if (this.user) return;
+    fetchUser = async () => {
         this.isLoading = true;
         try {
-            const response = await axios.get("/user_api/users/get_user", { withCredentials: true });
+        const response = await axios.get("/user_api/users/get_user");
+        runInAction(() => {
             this.user = response.data.user;
-        } catch (error) {
-            if (this.isAxiosError(error)) {
-                console.error("Ошибка при загрузке пользователя", error);
-            }
-            this.user = null;
-        } finally {
+            console.log(this.user)
             this.isLoading = false;
+        });
+        } catch (error) {
+        runInAction(() => {
+            this.isLoading = false;
+        });
         }
     }
 
-    async logout() {
+    logout = async () => {
         await axios.post("/user_api/users/logout");
         this.isAuth = false;
         this.user = null;
-    }
-
-    // Утилита для проверки, является ли ошибка экземпляром AxiosError
-    private isAxiosError(error: unknown): error is AxiosError {
-        return (error as AxiosError).response !== undefined;
     }
 }
 

@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import axios from "axios";
+import { IGrade } from "../types";
 
 class GradeStore {
     students = [];
@@ -21,7 +22,7 @@ class GradeStore {
         }
     }
 
-    async saveGrades(editedGrades) {
+    async saveGrades(editedGrades: Array<IGrade>) {
         const newGrades = Object.entries(editedGrades).map(([key, value]) => {
             const [student_id, subject_id] = key.split("-");
             return { student_id: Number(student_id), subject_id: Number(subject_id), value: Number(value) };
