@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useLoginUserMutation } from "../store/userApiSlice";
 
 const Login = () => {
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
+    const [loginUser] = useLoginUserMutation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            await axios.post("/user_api/users/login", { login, password })
-                .then(() => navigate("/"))
-                .catch((error) => setMessage(error.response.status.message));
-        } catch (error) {
-            console.error("Ошибка входа", error);
-        }
+        await loginUser({ login, password }).unwrap()
+            .then(() => navigate("/"))
+            .catch((error) => {
+                setMessage(error.data.message);
+                console.error("Ошибка входа", error);
+            });
     };
 
     // Проверяем, что форма валидна (поля заполнены)

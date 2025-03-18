@@ -3,16 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthProps } from "../types";
 import "../Header.css";
 import axios from "axios";
+import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "../store/userApiSlice";
 
 const Header: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const navigate = useNavigate();
+    const [getLogin] = useGetLoginMutation();
+    const [refresh] = useRefreshMutation();
+    const [logout] = useLogoutUserMutation();
 
     useEffect(() => {
-        axios.get('/user_api/users/get_login')
+        getLogin(1).unwrap()
             .then(() => setisauth(true))
             .catch((error) => {
-                if (error.response.status == 401) 
-                    axios.post('/user_api/users/refresh')
+                if (error.status == 401) 
+                    refresh(1).unwrap()
                         .then(() => setisauth(true))
                         .catch(() => setisauth(false));
                 
@@ -21,7 +25,7 @@ const Header: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     }, []);
 
     const handleLogout = () => {
-        axios.post('/user_api/users/logout')
+        logout(1).unwrap()
             .then(() => setisauth(false))
             .catch()
         navigate("/"); // Перенаправляем на главную страницу

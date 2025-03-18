@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useRegisterUserMutation } from "../store/userApiSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { IUser } from "../types";
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
+    const [registerUser] = useRegisterUserMutation();
     const [message, setMessage] = useState<string>("")
 
     const validationSchema = Yup.object({
@@ -29,13 +30,12 @@ const Register: React.FC = () => {
         validateOnBlur: true,  // <-- добавлено
         validateOnChange: true, 
         onSubmit: async (values: IUser) => {
-            try {
-                await axios.post("/user_api/users/register", values)
-                    .then(() => navigate("/"))
-                    .catch((error) => setMessage(error.response.data.message));
-            } catch (error) {
+            await registerUser(values).unwrap()
+            .then(() => navigate("/"))
+            .catch ((error) => {
+                setMessage(error.data.message);
                 console.error("Ошибка регистрации", error);
-            }
+            });
         },
     });
 

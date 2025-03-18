@@ -3,11 +3,14 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { AuthProps, IStudent } from "../types";
 import "../styles.css";
-import axios from "axios";
+import { useGetStudentsQuery, useAddStudentMutation, useEditStudentMutation, useDeleteStudentMutation } from "../store/mainApiSlice";
 
 const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+    const {data: query_students, isLoading} = useGetStudentsQuery();
     const [students, setStudents] = useState<Array<IStudent>>([]);
-
+    const [addStudent] = useAddStudentMutation();
+    const [editStudent] = useEditStudentMutation();
+    const [deleteStudent] = useDeleteStudentMutation();
     const [editingStudent, setEditingStudent] = useState<number | null>(null);
     const [editedData, setEditedData] = useState<Omit<IStudent, "id">>({
         fio: "",
@@ -25,10 +28,8 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        axios.get('/main_api/students/get_students')
-            .then((response) => {setStudents(response.data); console.log(response)})
-            .catch((error) => {console.log(error.message); setMessage("Неизвестная оишбка")})
-    }, [])
+        if (query_students) setStudents(query_students);
+    }, [query_students])
 
     // Изменение значения в ячейке
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
@@ -61,8 +62,8 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
                     : student
             )
         );
-        axios.post('/main_api/students/edit_student', {id: id, ...editedData})
-            .then((response) => {setMessage(response.data.message)})
+        editStudent({id: id, ...editedData}).unwrap()
+            .then((response) => {setMessage(response.message)})
             .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")});
         setEditingStudent(null);
         setEditedData({ fio: "", group: "", enter_year: 0 });
@@ -78,8 +79,8 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     // Удаление студента
     const handleDelete = (id: number) => {
-        axios.post('/main_api/students/delete_student', {"id": id})
-            .then((response) => {setMessage(response.data.message)})
+        deleteStudent({"id": id}).unwrap()
+            .then((response) => {setMessage(response.message)})
             .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")})
         setStudents(students.filter((student) => student.id !== id));
         console.log(`Студент с ID: ${id} удален`);
@@ -95,8 +96,8 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
             enter_year: Number(newStudent.enter_year),
         };
         setStudents([...students, studentToAdd]);
-        axios.post('/main_api/students/add_student', {id: newId, ...newStudent})
-            .then((response) => setMessage(response.data.message))
+        addStudent(newStudent).unwrap()
+            .then((response) => setMessage(response.message))
             .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")});
         setNewStudent({ fio: "", group: "", enter_year: 0 });
         setIsAddingNew(false); // Закрытие строки добавления
@@ -154,6 +155,8 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
             </tr>
         );
     };
+
+    if (isLoading) return <div>Загрузка...</div> 
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>

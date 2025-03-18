@@ -99,7 +99,7 @@ userRoutes.post('/refresh', (req, res) => {
         return;
     }
     if (!refreshTokens.includes(token)) {
-        res.status(403).json({ message: "Неверный токен" });
+        res.status(402).json({ message: "Неверный токен" });
         return;
     }
     try {
@@ -139,7 +139,7 @@ userRoutes.get('/get_user', authMiddleware_1.authMiddleware, (req, res) => __awa
         .then((user) => {
         if (user.length == 0)
             return res.status(404).json({ message: "Нет такого пользователя" });
-        res.status(200).json({ user: user[0] });
+        res.status(200).json(user[0]);
     })
         .catch((err) => {
         console.log(err);

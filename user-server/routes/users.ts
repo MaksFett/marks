@@ -144,7 +144,7 @@ userRoutes.get('/get_user', authMiddleware, async (req: Request, res: Response) 
     .then((user) => {
       if (user.length == 0) return res.status(404).json({ message: "Нет такого пользователя" });
       
-      res.status(200).json({ user: user[0] });
+      res.status(200).json(user[0]);
     })
     .catch((err) => {
       console.log(err);

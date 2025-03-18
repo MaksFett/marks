@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { AuthProps, ISubject, IGrade, IShortStudent } from "../types";
 import "../styles.css";
-import axios from "axios";
+import { useGetMarksQuery, useUpdateMarkMutation } from "../store/mainApiSlice";
 
 const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const { id } = useParams<{ id?: string }>();
@@ -13,12 +13,14 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     const [subjects, setSubjects] = useState<Array<ISubject>>([]);
 
+    const {data: query_grades, isLoading} = useGetMarksQuery();
+    const [updateMarks] = useUpdateMarkMutation();
     const [grades, setGrades] = useState<Array<IGrade>>([]);
     const [editedGrades, setEditedGrades] = useState<{ [key: string]: string }>({});
 
     const [message, setMessage] = useState<string>("");
 
-    useEffect(() => {
+    /*useEffect(() => {
         axios.get('/main_api/marks/get_marks')
             .then((response) => {
                 setStudents(response.data.students);
@@ -29,7 +31,14 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
                 console.log(error.message);
                 setMessage("Неизвестная ошибка")
             })
-    }, [])
+    }, [])*/
+    useEffect(() => {
+        if (query_grades) {
+            setGrades(query_grades.marks);
+            setStudents(query_grades.students);
+            setSubjects(query_grades.subjects);
+        }
+    }, [query_grades])
 
     // Функция обновления значения в input
     const handleGradeChange = (studentId: number, subjectId: number, value: string) => {
@@ -43,8 +52,8 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const saveChanges = () => {
         console.log("Изменённые оценки:", editedGrades);
         const new_grades = Object.entries(editedGrades).map((g) => new Object({"student_id": Number(g[0].split('-')[0]),"subject_id": Number(g[0].split('-')[1]), "value": Number(g[1])}))
-        axios.post('/main_api/marks/add_marks', new_grades)
-            .then((response) => setMessage(response.data.message))
+        updateMarks(new_grades as Array<IGrade>).unwrap()
+            .then((response) => setMessage(response.message))
             .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка"); return});
         setGrades(prevGrades =>
             prevGrades.map(g =>
@@ -55,6 +64,8 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
         );
         setEditedGrades({});
     };
+
+    if (isLoading) return <div>Загрузка...</div> 
 
     return (
         <div style={{ padding: "20px" }}>

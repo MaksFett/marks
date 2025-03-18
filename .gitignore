@@ -1,6 +1,7 @@
 npm-debug.log*
 node_modules/
 pids
+build/
 *.pid
 *.seed
 *.pid.lock
