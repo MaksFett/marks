@@ -6,13 +6,25 @@ class StudentStore {
   students: IStudent[] = [];
   message: string = "";
   isLoading: boolean = false;
+  cacheTimestamp = null;
+  cacheDuration = 60000;
 
   constructor() {
     makeAutoObservable(this);
   }
 
+  isCacheValid = () => {
+    return (
+        this.cacheTimestamp &&
+        Date.now() - this.cacheTimestamp < this.cacheTimestamp
+    );
+  }
+
   // Загружаем список студентов
   fetchStudents = async () => {
+    if (this.students.length > 0 && this.isCacheValid()){
+      return;
+    }
     this.isLoading = true;
     try {
       const response = await axios.get("/main_api/students/get_students");

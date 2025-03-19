@@ -6,12 +6,24 @@ class GradeStore {
     students = [];
     subjects = [];
     grades = [];
+    cacheTimestamp = null;
+    cacheDuration = 60000;
     
     constructor() {
         makeAutoObservable(this);
     }
 
+    isCacheValid = () => {
+        return (
+            this.cacheTimestamp &&
+            Date.now() - this.cacheTimestamp < this.cacheTimestamp
+        );
+    }
+
     async fetchGrades() {
+        if (this.grades.length > 0 && this.isCacheValid()){
+            return;
+        }
         try {
             const response = await axios.get("/main_api/marks/get_marks");
             this.students = response.data.students;
