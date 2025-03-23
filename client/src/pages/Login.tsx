@@ -12,7 +12,11 @@ const Login = () => {
         e.preventDefault();
         try {
             await axios.post("/user_api/users/login", { login, password })
-                .then(() => navigate("/"))
+                .then((response) => {
+                    localStorage.setItem("access-token", response.data.accessToken);
+                    localStorage.setItem("refresh-token", response.data.refreshToken);
+                    navigate("/");
+                })
                 .catch((error) => setMessage(error.response.status.message));
         } catch (error) {
             console.error("Ошибка входа", error);

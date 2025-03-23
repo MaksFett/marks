@@ -14,12 +14,12 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const [subjects, setSubjects] = useState<Array<ISubject>>([]);
 
     const [grades, setGrades] = useState<Array<IGrade>>([]);
-    const [editedGrades, setEditedGrades] = useState<{ [key: string]: string }>({});
+    const [editedGrades, setEditedGrades] = useState<{ [key: string]: number }>({});
 
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        axios.get('/main_api/marks/get_marks')
+        axios.get('/main_api/marks/get_marks', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
             .then((response) => {
                 setStudents(response.data.students);
                 setSubjects(response.data.subjects);
@@ -32,7 +32,8 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     }, [])
 
     // Функция обновления значения в input
-    const handleGradeChange = (studentId: number, subjectId: number, value: string) => {
+    const handleGradeChange = (studentId: number, subjectId: number, value: number) => {
+        //if (value < 0 || value > 5) { setMessage("Недопустимое значение оценки"); return; }
         setEditedGrades(prev => ({
             ...prev,
             [`${studentId}-${subjectId}`]: value,
@@ -43,13 +44,17 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const saveChanges = () => {
         console.log("Изменённые оценки:", editedGrades);
         const new_grades = Object.entries(editedGrades).map((g) => new Object({"student_id": Number(g[0].split('-')[0]),"subject_id": Number(g[0].split('-')[1]), "value": Number(g[1])}))
-        axios.post('/main_api/marks/add_marks', new_grades)
+        axios.post('/main_api/marks/add_marks', new_grades, {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
             .then((response) => setMessage(response.data.message))
-            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка"); return});
+            .catch((error) => {
+                if (error.response.status === 406) { setMessage(error.response.data.message); }
+                else { setMessage("Неизвестная ошибка"); } 
+                return
+            });
         setGrades(prevGrades =>
             prevGrades.map(g =>
                 editedGrades[`${g.student_id}-${g.subject_id}`] !== undefined
-                    ? { ...g, value: Number(editedGrades[`${g.student_id}-${g.subject_id}`]) }
+                    ? { ...g, value: editedGrades[`${g.student_id}-${g.subject_id}`] }
                     : g
             )
         );
@@ -92,10 +97,10 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
                                     <td key={subject.id} style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
                                         <input
                                             type="number"
-                                            max="5"
                                             min="1"
+                                            max="5"
                                             value={inputValue}
-                                            onChange={e => handleGradeChange(student.id, subject.id, e.target.value)}
+                                            onChange={e => handleGradeChange(student.id, subject.id, Number(e.target.value))}
                                             style={{
                                                 width: "100%",
                                                 background: "none",

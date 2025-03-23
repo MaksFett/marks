@@ -25,7 +25,7 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        axios.get('/main_api/students/get_students')
+        axios.get('/main_api/students/get_students', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
             .then((response) => {setStudents(response.data); console.log(response)})
             .catch((error) => {console.log(error.message); setMessage("Неизвестная оишбка")})
     }, [])
@@ -61,11 +61,17 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
                     : student
             )
         );
-        axios.post('/main_api/students/edit_student', {id: id, ...editedData})
-            .then((response) => {setMessage(response.data.message)})
-            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")});
-        setEditingStudent(null);
-        setEditedData({ fio: "", group: "", enter_year: 0 });
+        axios.post('/main_api/students/edit_student', {id: id, ...editedData}, {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
+            .then((response) => {
+                setMessage(response.data.message);
+                setEditingStudent(null);
+                setEditedData({ fio: "", group: "", enter_year: 0 });
+            })
+            .catch((error) => {
+                console.log(error.message); 
+                if (error.response.status == 406) setMessage(error.response.data.message)
+                else setMessage("Неизвестная ошибка")
+            });
         console.log(`Изменения сохранены для студента с ID: ${id}`);
     };
 
@@ -78,7 +84,7 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     // Удаление студента
     const handleDelete = (id: number) => {
-        axios.post('/main_api/students/delete_student', {"id": id})
+        axios.post('/main_api/students/delete_student', {"id": id}, {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
             .then((response) => {setMessage(response.data.message)})
             .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")})
         setStudents(students.filter((student) => student.id !== id));
@@ -94,13 +100,21 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
             group: newStudent.group,
             enter_year: Number(newStudent.enter_year),
         };
-        setStudents([...students, studentToAdd]);
-        axios.post('/main_api/students/add_student', {id: newId, ...newStudent})
-            .then((response) => setMessage(response.data.message))
-            .catch((error) => {console.log(error.message); setMessage("Неизвестная ошибка")});
-        setNewStudent({ fio: "", group: "", enter_year: 0 });
-        setIsAddingNew(false); // Закрытие строки добавления
-        console.log(`Добавлен новый студент: ${studentToAdd.fio}`);
+        axios.post('/main_api/students/add_student', {id: newId, ...newStudent}, {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
+            .then((response) => {
+                setMessage(response.data.message);
+                setStudents([...students, studentToAdd]);
+                setNewStudent({ fio: "", group: "", enter_year: 0 });
+                setIsAddingNew(false); // Закрытие строки добавления
+                console.log(`Добавлен новый студент: ${studentToAdd.fio}`);
+            })
+            .catch((error) => {
+                console.log(error.message); 
+                if (error.response.status == 406) {
+                    setMessage(error.response.data.message);
+                }
+                else setMessage("Неизвестная ошибка")
+            });
     };
 
     // Отмена добавления нового студента

@@ -8,7 +8,7 @@ EXPOSE ${MAIN_API_PORT}
 
 FROM base as production
 ENV NODE_ENV=production
-RUN npm i
+RUN npm install
 COPY ./ ./
 CMD ["node", "app"]
 

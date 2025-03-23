@@ -8,23 +8,23 @@ const Header: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('/user_api/users/get_login')
+        axios.get('/user_api/users/get_login', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
             .then(() => setisauth(true))
             .catch((error) => {
                 if (error.response.status == 401) 
-                    axios.post('/user_api/users/refresh')
+                    axios.post('/user_api/users/refresh', {headers: { "Authorization": "Bearer " + localStorage.getItem("refresh-token")}})
                         .then(() => setisauth(true))
-                        .catch(() => setisauth(false));
+                        .catch(() => {setisauth(false); navigate('/login');});
                 
-                else setisauth(false);
+                else { setisauth(false); navigate('/login'); }
             });
     }, []);
 
     const handleLogout = () => {
-        axios.post('/user_api/users/logout')
-            .then(() => setisauth(false))
+        axios.get('/user_api/users/logout', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
+            .then(() => {localStorage.clear(); setisauth(false); navigate('login');})
             .catch()
-        navigate("/"); // Перенаправляем на главную страницу
+        navigate("/");
     };
 
     return (

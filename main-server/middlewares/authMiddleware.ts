@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.header("Authorization")?.split(" ")[1];
-  console.log(req.headers)
+  console.log(req.headers);
 
   if (!token) {
     res.status(401).json({ message: "Вы не авторизованны" });

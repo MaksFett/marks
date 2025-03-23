@@ -31,7 +31,11 @@ const Register: React.FC = () => {
         onSubmit: async (values: IUser) => {
             try {
                 await axios.post("/user_api/users/register", values)
-                    .then(() => navigate("/"))
+                    .then((response) => {
+                        localStorage.setItem("access-token", response.data.accessToken);
+                        localStorage.setItem("refresh-token", response.data.refreshToken);
+                        navigate("/");
+                    })
                     .catch((error) => setMessage(error.response.data.message));
             } catch (error) {
                 console.error("Ошибка регистрации", error);

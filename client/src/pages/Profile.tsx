@@ -9,7 +9,7 @@ const Profile: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("/user_api/users/get_user", { withCredentials: true})
+        axios.get("/user_api/users/get_user", { withCredentials: true, headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
             .then((response) => setUser(response.data.user as IUser))
             .catch(() => navigate('/login'));
     }, []);
