@@ -22,9 +22,9 @@ const Header: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     const handleLogout = () => {
         axios.get('/user_api/users/logout', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
-            .then(() => {localStorage.clear(); setisauth(false); navigate('login');})
-            .catch()
-        navigate("/");
+        localStorage.clear(); 
+        setisauth(false);
+        navigate("/login");
     };
 
     return (
