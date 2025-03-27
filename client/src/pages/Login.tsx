@@ -17,7 +17,7 @@ const Login = () => {
                     localStorage.setItem("refresh-token", response.data.refreshToken);
                     navigate("/");
                 })
-                .catch((error) => setMessage(error.response.status.message));
+                .catch((error) => setMessage(error.response.data.message));
         } catch (error) {
             console.error("Ошибка входа", error);
         }
