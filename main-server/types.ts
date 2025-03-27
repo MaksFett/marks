@@ -1,7 +1,10 @@
 export type IUser = {
     login: string;
     email: string;
+    password: string;
 }
+
+export type IShortUser = Omit<IUser, "password">
 
 export type IStudent = {
     id: number;

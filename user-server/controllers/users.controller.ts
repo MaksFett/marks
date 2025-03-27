@@ -69,21 +69,7 @@ export async function refresh(req: Request, res: Response) {
     refreshTokens = refreshTokens.filter(t => t !== token);
     refreshTokens.push(newRefreshToken);
 
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000,
-    });
-
-    res.cookie("refreshToken", newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({ message: "" });
+    res.status(200).json({ "accessToken": accessToken, "refreshToken": newRefreshToken });
   } catch (err) {
     res.status(403).json({ message: "Неправильный refresh-токен" });
   }

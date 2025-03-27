@@ -32,7 +32,7 @@ services:
       - client
     restart: always
     build:
-      dockerfile: ./nginx/DockerfileDev
+      dockerfile: ./nginx/DockerfileProd
       context: .
     ports:
       - "8008:80"
