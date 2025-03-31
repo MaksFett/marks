@@ -1,32 +1,35 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthProps } from "../types";
+import { useSelector } from "react-redux";
 import "../Header.css";
-import axios from "axios";
-import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "../store/userApiSlice";
+import { selectIsAuth, setAuthState } from "../store/slices/authSlice";
+import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "../store/slices/userApiSlice";
 
-const Header: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+const Header: React.FC = () => {
+    const isAuth = useSelector(selectIsAuth);
     const navigate = useNavigate();
     const [getLogin] = useGetLoginMutation();
     const [refresh] = useRefreshMutation();
     const [logout] = useLogoutUserMutation();
 
     useEffect(() => {
-        getLogin(1).unwrap()
-            .then(() => setisauth(true))
+        getLogin().unwrap()
+            .then(() => setAuthState(true))
             .catch((error) => {
-                if (error.status == 401) 
-                    refresh(1).unwrap()
-                        .then(() => setisauth(true))
-                        .catch(() => setisauth(false));
+                console.log(isAuth)
+                if (error.status === 401) 
+                    refresh().unwrap()
+                        .then(() => setAuthState(true))
+                        .catch(() => setAuthState(false));
                 
-                else setisauth(false);
+                else setAuthState(false);
             });
-    }, []);
+        console.log(isAuth);
+    }, [getLogin, refresh]);
 
     const handleLogout = () => {
-        logout(1).unwrap()
-            .then(() => setisauth(false))
+        logout().unwrap()
+            .then(() => setAuthState(false))
             .catch()
         navigate("/"); // Перенаправляем на главную страницу
     };

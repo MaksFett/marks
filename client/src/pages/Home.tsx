@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
-import { AuthProps, IStudent } from "../types";
+import { IStudent } from "../types";
 import "../styles.css";
-import { useGetStudentsQuery, useAddStudentMutation, useEditStudentMutation, useDeleteStudentMutation } from "../store/mainApiSlice";
+import { useSelector } from "react-redux";
+import { selectIsAuth } from "../store/slices/authSlice";
+import { useGetStudentsQuery, useAddStudentMutation, useEditStudentMutation, useDeleteStudentMutation } from "../store/slices/studentApiSlice";
 
-const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+const Home: React.FC = () => {
+    const isAuth = useSelector(selectIsAuth);
     const {data: query_students, isLoading} = useGetStudentsQuery();
     const [students, setStudents] = useState<Array<IStudent>>([]);
     const [addStudent] = useAddStudentMutation();
@@ -160,7 +163,7 @@ const Home: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <Header isAuth={isAuth} setisauth={setisauth}/>
+            <Header />
             <h1 style={{ fontWeight: "bold", textAlign: "center" }}>Список студентов</h1>
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
                 <thead>

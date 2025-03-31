@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/Header";
-import { AuthProps, ISubject, IGrade, IShortStudent } from "../types";
+import { ISubject, IGrade, IShortStudent } from "../types";
 import "../styles.css";
-import { useGetMarksQuery, useUpdateMarkMutation } from "../store/mainApiSlice";
+import { useGetMarksQuery, useUpdateMarkMutation } from "../store/slices/marksApiSlice";
+import { useSelector } from "react-redux";
+import { selectIsAuth } from "../store/slices/authSlice";
 
-const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+const GradeList: React.FC = () => {
+    const isAuth = useSelector(selectIsAuth);
     const { id } = useParams<{ id?: string }>();
     const selectedStudentId = id ? parseInt(id, 10) : null;
 
@@ -20,18 +23,6 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     const [message, setMessage] = useState<string>("");
 
-    /*useEffect(() => {
-        axios.get('/main_api/marks/get_marks')
-            .then((response) => {
-                setStudents(response.data.students);
-                setSubjects(response.data.subjects);
-                setGrades(response.data.marks);
-            })
-            .catch((error) => {
-                console.log(error.message);
-                setMessage("Неизвестная ошибка")
-            })
-    }, [])*/
     useEffect(() => {
         if (query_grades) {
             setGrades(query_grades.marks);
@@ -69,7 +60,7 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     return (
         <div style={{ padding: "20px" }}>
-            <Header isAuth={isAuth} setisauth={setisauth} />
+            <Header />
             <h1 style={{ fontWeight: "bold" }}>Список оценок</h1>
             <table style={{ borderCollapse: "collapse", width: "100%" }}>
                 <thead>
