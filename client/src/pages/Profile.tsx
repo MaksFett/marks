@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { observer } from "mobx-react-lite"; // Оборачивание компонента в observer
+import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
-import userStore from "../stores/UserStore"; 
+import userStore from "../stores/UserStore";
 import Header from "../components/Header";
 import { AuthProps } from "../types";
 
@@ -13,7 +13,7 @@ const Profile: React.FC<AuthProps> = observer(() => {
         fetchUser(); 
     }, [isAuth, fetchUser, navigate]);
 
-    if (!user) return <div>Загрузка...</div>; 
+    if (!user) return null;
 
     return (
         <div>

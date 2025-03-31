@@ -23,12 +23,13 @@ class UserStore {
                         console.log(this.isAuth)
                     } catch {
                         this.isAuth = false;
-                    }
-                } else {
-                    this.isAuth = false;
+                    });
                 }
             } else {
                 console.error("Неизвестная ошибка:", error);
+                runInAction(() => {
+                    this.isAuth = false;
+                });
             }
         })
     }
@@ -47,7 +48,7 @@ class UserStore {
             this.isLoading = false;
         });
         }
-    }
+    };
 
     logout = async () => {
         await axios.post("/user_api/users/logout");

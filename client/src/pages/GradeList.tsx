@@ -4,27 +4,64 @@ import { observer } from "mobx-react-lite";
 import Header from "../components/Header";
 import GradeStore from "../store/GradeStore";
 import "../styles.css";
+import axios from "axios";
 
 const GradeList: React.FC = observer(() => {
     const { id } = useParams<{ id?: string }>();
     const selectedStudentId = id ? parseInt(id, 10) : null;
 
-    const [editedGrades, setEditedGrades] = useState<{ [key: string]: string }>({});
+    const [editedGrades, setEditedGrades] = useState<{ [key: string]: number }>({});
+    const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        GradeStore.fetchGrades();
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('/main_api/marks/get_marks', {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("access-token")}`,
+                    },
+                });
+                GradeStore.setStudents(response.data.students);
+                GradeStore.setSubjects(response.data.subjects);
+                GradeStore.setGrades(response.data.marks);
+            } catch (error: any) {
+                setMessage("Не удалось загрузить данные");
+            }
+        };
+
+        fetchData();
     }, []);
 
-    const handleGradeChange = (studentId: number, subjectId: number, value: string) => {
+    const handleGradeChange = (studentId: number, subjectId: number, value: number) => {
         setEditedGrades(prev => ({
             ...prev,
             [`${studentId}-${subjectId}`]: value,
         }));
     };
 
-    const saveChanges = () => {
-        GradeStore.saveGrades(editedGrades);
-        setEditedGrades({});
+    const saveChanges = async () => {
+        const newGrades = Object.entries(editedGrades).map(([key, value]) => {
+            const [studentId, subjectId] = key.split("-").map(Number);
+            return { student_id: studentId, subject_id: subjectId, value };
+        });
+
+        try {
+            const response = await axios.post('/main_api/marks/add_marks', newGrades, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access-token")}`,
+                },
+            });
+            setMessage(response.data.message);
+
+            GradeStore.updateGrades(editedGrades);
+            setEditedGrades({});
+        } catch (error: any) {
+            if (error.response?.status === 406) {
+                setMessage(error.response.data.message);
+            } else {
+                setMessage("Неизвестная ошибка при сохранении");
+            }
+        }
     };
 
     return (
@@ -53,7 +90,9 @@ const GradeList: React.FC = observer(() => {
                         >
                             <td style={{ border: "1px solid black", padding: "10px" }}>{student.fio}</td>
                             {GradeStore.subjects.map(subject => {
-                                const grade = GradeStore.grades.find(g => g.student_id === student.id && g.subject_id === subject.id);
+                                const grade = GradeStore.grades.find(
+                                    g => g.student_id === student.id && g.subject_id === subject.id
+                                );
                                 const inputValue =
                                     editedGrades[`${student.id}-${subject.id}`] !== undefined
                                         ? editedGrades[`${student.id}-${subject.id}`]
@@ -63,10 +102,12 @@ const GradeList: React.FC = observer(() => {
                                     <td key={subject.id} style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
                                         <input
                                             type="number"
-                                            max="5"
                                             min="1"
+                                            max="5"
                                             value={inputValue}
-                                            onChange={e => handleGradeChange(student.id, subject.id, e.target.value)}
+                                            onChange={e =>
+                                                handleGradeChange(student.id, subject.id, Number(e.target.value))
+                                            }
                                             style={{
                                                 width: "100%",
                                                 background: "none",
@@ -98,6 +139,7 @@ const GradeList: React.FC = observer(() => {
             >
                 Сохранить изменения
             </button>
+            <div>{message}</div>
         </div>
     );
 });

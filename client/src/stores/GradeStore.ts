@@ -25,10 +25,15 @@ class GradeStore {
             return;
         }
         try {
-            const response = await axios.get("/main_api/marks/get_marks");
-            this.students = response.data.students;
-            this.subjects = response.data.subjects;
-            this.grades = response.data.marks;
+            const response = await axios.get("/main_api/marks/get_marks", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access-token")}`,
+                },
+            });
+            this.setStudents(response.data.students);
+            this.setSubjects(response.data.subjects);
+            this.setGrades(response.data.marks);
+            this.cacheTimestamp = Date.now();
         } catch (error) {
             console.error("Ошибка загрузки оценок:", error);
         }
@@ -41,11 +46,35 @@ class GradeStore {
         });
 
         try {
-            await axios.post("/main_api/marks/add_marks", newGrades);
-            this.fetchGrades(); // Обновляем оценки после сохранения
+            await axios.post("/main_api/marks/add_marks", newGrades, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access-token")}`,
+                },
+            });
+            await this.fetchGrades();
         } catch (error) {
             console.error("Ошибка сохранения оценок:", error);
         }
+    }
+
+    updateGrades(edited: { [key: string]: number }) {
+        this.grades = this.grades.map(g =>
+            edited[`${g.student_id}-${g.subject_id}`] !== undefined
+                ? { ...g, value: edited[`${g.student_id}-${g.subject_id}`] }
+                : g
+        );
+    }
+
+    setStudents(students: IShortStudent[]) {
+        this.students = students;
+    }
+
+    setSubjects(subjects: ISubject[]) {
+        this.subjects = subjects;
+    }
+
+    setGrades(grades: IGrade[]) {
+        this.grades = grades;
     }
 }
 

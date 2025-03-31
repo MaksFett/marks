@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
@@ -12,23 +12,8 @@ const Home: React.FC = () => {
     const { isAuth } = userStore;
 
     useEffect(() => {
-        fetchStudents(); // Fetch students when the component is mounted
+        fetchStudents();
     }, [fetchStudents]);
-
-    const [editingStudent, setEditingStudent] = React.useState<number | null>(null);
-    const [editedData, setEditedData] = React.useState<Omit<IStudent, "id">>({
-        fio: "",
-        group: "",
-        enter_year: 0,
-    });
-
-    const [newStudent, setNewStudent] = React.useState<Omit<IStudent, "id">>({
-        fio: "",
-        group: "",
-        enter_year: 0,
-    });
-
-    const [isAddingNew, setIsAddingNew] = React.useState<boolean>(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         setEditedData({ ...editedData, [field]: e.target.value });
@@ -120,10 +105,10 @@ const Home: React.FC = () => {
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
                 <thead>
                     <tr>
-                        <th style={{ border: "1px solid black", padding: "10px" }}>ФИО</th>
-                        <th style={{ border: "1px solid black", padding: "10px" }}>Группа</th>
-                        <th style={{ border: "1px solid black", padding: "10px" }}>Год поступления</th>
-                        <th style={{ border: "1px solid black", padding: "10px" }}>Действия</th>
+                        <th>ФИО</th>
+                        <th>Группа</th>
+                        <th>Год поступления</th>
+                        <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -164,6 +149,7 @@ const Home: React.FC = () => {
                                     student.enter_year
                                 )}
                             </td>
+<<<<<<< HEAD
                             <td style={{ border: "1px solid black", padding: "10px" }}>
                                 {isAuth ? (editingStudent === student.id ? (
                                     <>
@@ -200,6 +186,20 @@ const Home: React.FC = () => {
                                         </button>
                                     </>
                                 )) : <></>}
+=======
+                            <td>
+                                {isAuth ? (editingStudent === student.id ? (
+                                    <>
+                                        <button onClick={() => handleSave(student.id)}>Сохранить</button>
+                                        <button onClick={handleCancel}>Отмена</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button onClick={() => handleEdit(student)}>✏️</button>
+                                        <button onClick={() => handleDelete(student.id)}>❌</button>
+                                    </>
+                                )) : null}
+>>>>>>> a3f5757 (Изменения с токенами и улучшение. Костромина)
                             </td>
                         </tr>
                     ))}
@@ -208,7 +208,9 @@ const Home: React.FC = () => {
             </table>
 
             {!isAddingNew && isAuth && (
-                <button onClick={() => setIsAddingNew(true)}>Добавить студента</button>
+                <button onClick={() => setIsAddingNew(true)} style={{ marginTop: "20px" }}>
+                    Добавить студента
+                </button>
             )}
 
             {message && <div>{message}</div>}
@@ -216,4 +218,4 @@ const Home: React.FC = () => {
     );
 };
 
-export default observer(Home); // Use observer to make the component reactive to MobX store changes
+export default observer(Home);

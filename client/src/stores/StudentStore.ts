@@ -27,9 +27,10 @@ class StudentStore {
     }
     this.isLoading = true;
     try {
-      const response = await axios.get("/main_api/students/get_students");
+      const response = await axios.get("/main_api/students/get_students", this.authHeader);
       runInAction(() => {
         this.students = response.data;
+        this.cacheTimestamp = Date.now();
         this.isLoading = false;
       });
     } catch (error) {
@@ -43,11 +44,11 @@ class StudentStore {
   // Редактирование студента
   editStudent = async (id: number, editedData: Omit<IStudent, "id">) => {
     try {
-      await axios.post("/main_api/students/edit_student", { id, ...editedData });
+      await axios.post("/main_api/students/edit_student", { id, ...editedData }, this.authHeader);
       runInAction(() => {
-        const studentIndex = this.students.findIndex((s) => s.id === id);
-        if (studentIndex !== -1) {
-          this.students[studentIndex] = { ...this.students[studentIndex], ...editedData };
+        const index = this.students.findIndex((s) => s.id === id);
+        if (index !== -1) {
+          this.students[index] = { ...this.students[index], ...editedData };
         }
       });
     } catch (error) {
@@ -58,9 +59,9 @@ class StudentStore {
   // Удаление студента
   deleteStudent = async (id: number) => {
     try {
-      await axios.post("/main_api/students/delete_student", { id });
+      await axios.post("/main_api/students/delete_student", { id }, this.authHeader);
       runInAction(() => {
-        this.students = this.students.filter((student) => student.id !== id);
+        this.students = this.students.filter((s) => s.id !== id);
       });
     } catch (error) {
       this.message = "Неизвестная ошибка";
@@ -69,9 +70,12 @@ class StudentStore {
 
   // Добавление нового студента
   addStudent = async (newStudent: Omit<IStudent, "id">) => {
-    const newId = this.students.length > 0 ? Math.max(...this.students.map((student) => student.id)) + 1 : 1;
+    const newId =
+      this.students.length > 0
+        ? Math.max(...this.students.map((s) => s.id)) + 1
+        : 1;
     try {
-      await axios.post("/main_api/students/add_student", { id: newId, ...newStudent });
+      await axios.post("/main_api/students/add_student", { id: newId, ...newStudent }, this.authHeader);
       runInAction(() => {
         this.students.push({ id: newId, ...newStudent });
       });
