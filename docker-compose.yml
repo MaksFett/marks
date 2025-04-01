@@ -32,8 +32,8 @@ services:
       - client
     restart: always
     build:
-      dockerfile: Dockerfile
-      context: ./nginx
+      dockerfile: ./nginx/DockerfileDev
+      context: .
     ports:
       - "8008:80"
 
@@ -52,6 +52,7 @@ services:
     environment:
       <<: *common-variables
       PORT: $MAIN_API_PORT
+      JWT_SECRET: $JWT_SECRET
       NODE_ENV: development
 
   user_api:

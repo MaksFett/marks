@@ -12,9 +12,13 @@ const Login = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await loginUser({ login, password }).unwrap()
-            .then(() => navigate("/"))
+            .then((response) => {
+                localStorage.setItem("access-token", response.accessToken);
+                localStorage.setItem("refresh-token", response.refreshToken);
+                navigate("/");
+            })
             .catch((error) => {
-                setMessage(error.data.message);
+                setMessage(error.message);
                 console.error("Ошибка входа", error);
             });
     };

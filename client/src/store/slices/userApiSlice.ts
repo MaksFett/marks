@@ -1,20 +1,23 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IUser, IShortUser } from '../types';
+import { IUser, IShortUser } from '../../types';
 
 export const userApiSlice = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/user_api/' }),
   tagTypes: ['User'],
   endpoints: (builder) => ({
-    registerUser: builder.mutation<void, IUser>({
+    registerUser: builder.mutation<{"accessToken": string, "refreshToken": string}, IUser>({
         query: (userData) => ({
             url: 'users/register',
             method: 'POST',
             body: userData,
         }),
+        transformErrorResponse: (
+            response: { status: string | number },
+          ) => response,
         invalidatesTags: ['User'],
     }),
-    loginUser: builder.mutation<void, Omit<IUser, "email">>({
+    loginUser: builder.mutation<{"accessToken": string, "refreshToken": string}, Omit<IUser, "email">>({
         query: (credentials) => ({
             url: 'users/login',
             method: 'POST',
@@ -22,28 +25,31 @@ export const userApiSlice = createApi({
         }),
         transformErrorResponse: (
             response: { status: string | number },
-            meta,
-            arg,
           ) => response,
         invalidatesTags: ['User'],
     }),
     getUser: builder.query<IShortUser, void>({
-        query: () => 'users/get_user',
+        query: () => ({
+            url: 'users/get_user',
+            headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`},
+        }),
         transformErrorResponse: (
             response: { status: string | number },
-            meta,
-            arg,
           ) => response.status,
         providesTags: ['User'],
     }),
     getLogin: builder.mutation<{"login": string}, void>({
-        query: () => 'users/get_login',
+        query: () => ({
+            url: 'users/get_login',
+            headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`}
+        }),
         invalidatesTags: ['User'],
     }),
     refresh: builder.mutation<void, void>({
         query: () => ({
-            url: 'refresh',
+            url: 'users/refresh',
             method: 'POST',
+            headers: {"authorization": `bearer ${localStorage.getItem("refresh-token")}`}
         }),
         invalidatesTags: ['User'],
     }),
@@ -51,6 +57,7 @@ export const userApiSlice = createApi({
         query: () => ({
             url: 'users/logout',
             method: 'POST',
+            headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`}
         }),
         invalidatesTags: ['User'],
     }),

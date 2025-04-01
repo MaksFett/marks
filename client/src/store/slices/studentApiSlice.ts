@@ -3,8 +3,15 @@ import { IStudent } from '../../types';
 
 export const studentApiSlice = createApi({
   reducerPath: 'students_api',
-  baseQuery: fetchBaseQuery({ baseUrl: '/main_api/students' }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: '/main_api/students',
+    prepareHeaders: (headers) => {
+      headers.set("authorization", `bearer ${localStorage.getItem("access-token")}`);
+      return headers;
+    },
+   }),
   tagTypes: ['Students'],
+  keepUnusedDataFor: 30,
   endpoints: (builder) => ({
     getStudents: builder.query<Array<IStudent>,void>({
       query: () => 'get_students',
@@ -17,6 +24,9 @@ export const studentApiSlice = createApi({
         method: 'POST',
         body: newStudent,
       }),
+      transformErrorResponse: (
+        response: { status: string | number },
+      ) => response,
       invalidatesTags: ['Students'],
     }),
 
@@ -26,6 +36,9 @@ export const studentApiSlice = createApi({
           method: 'POST',
           body: editingStudent,
         }),
+        transformErrorResponse: (
+          response: { status: string | number },
+        ) => response,
         invalidatesTags: ['Students'],
       }),
 
@@ -35,6 +48,9 @@ export const studentApiSlice = createApi({
         method: 'POST',
         body: id,
       }),
+      transformErrorResponse: (
+        response: { status: string | number },
+      ) => response,
       invalidatesTags: ['Students'],
     })
   }),

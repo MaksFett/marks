@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "../Header.css";
 import { selectIsAuth, setAuthState } from "../store/slices/authSlice";
 import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "../store/slices/userApiSlice";
 
 const Header: React.FC = () => {
     const isAuth = useSelector(selectIsAuth);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [getLogin] = useGetLoginMutation();
     const [refresh] = useRefreshMutation();
@@ -14,24 +15,27 @@ const Header: React.FC = () => {
 
     useEffect(() => {
         getLogin().unwrap()
-            .then(() => setAuthState(true))
+            .then(() => {
+                dispatch(setAuthState(true));
+            })
             .catch((error) => {
-                console.log(isAuth)
-                if (error.status === 401) 
+                if (error.status === 401 || error.status === 403) 
+                    {console.log(1)
                     refresh().unwrap()
-                        .then(() => setAuthState(true))
-                        .catch(() => setAuthState(false));
-                
-                else setAuthState(false);
+                        .then(() => dispatch(setAuthState(true)))
+                        .catch(() => dispatch(setAuthState(false)));
+                    console.log(2)}
+                else dispatch(setAuthState(false));
             });
-        console.log(isAuth);
-    }, [getLogin, refresh]);
+    }, []);
 
     const handleLogout = () => {
         logout().unwrap()
-            .then(() => setAuthState(false))
-            .catch()
-        navigate("/"); // Перенаправляем на главную страницу
+            .then(() => {
+                localStorage.clear();
+                dispatch(setAuthState(false));
+            })
+        navigate("/login");
     };
 
     return (

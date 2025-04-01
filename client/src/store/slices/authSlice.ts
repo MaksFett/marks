@@ -14,7 +14,6 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setAuthState: (state, action: PayloadAction<boolean>) => {
-      console.log(1)
       state.isAuth = action.payload;
     }
   },
@@ -22,7 +21,6 @@ const authSlice = createSlice({
 
 export const { setAuthState } = authSlice.actions;
 
-// Селектор для получения isAuth
 export const selectIsAuth = (state: RootState) => state.auth.isAuth;
 
 export default authSlice;

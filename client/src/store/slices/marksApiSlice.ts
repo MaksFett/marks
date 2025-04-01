@@ -3,7 +3,13 @@ import { IStudent, IGrade, ISubject } from '../../types';
 
 export const marksApiSlice = createApi({
   reducerPath: 'marks_api',
-  baseQuery: fetchBaseQuery({ baseUrl: '/main_api/marks' }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: '/main_api/marks',
+    prepareHeaders: (headers) => {
+      headers.set("authorization", `bearer ${localStorage.getItem("access-token")}`);
+      return headers;
+    },
+   }),
   tagTypes: ['Marks'],
   endpoints: (builder) => ({
     getMarks: builder.query<{"marks": Array<IGrade>, "students": Array<IStudent>, "subjects": Array<ISubject>}, void>({
@@ -17,6 +23,9 @@ export const marksApiSlice = createApi({
         method: 'POST',
         body: updatedMark,
       }),
+      transformErrorResponse: (
+        response: { status: string | number },
+      ) => response,
       invalidatesTags: ['Marks'],
     }),
   }),

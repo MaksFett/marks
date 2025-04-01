@@ -31,9 +31,13 @@ const Register: React.FC = () => {
         validateOnChange: true, 
         onSubmit: async (values: IUser) => {
             await registerUser(values).unwrap()
-            .then(() => navigate("/"))
+            .then((response) => {
+                localStorage.setItem("access-token", response.accessToken);
+                localStorage.setItem("refresh-token", response.refreshToken);
+                navigate("/");
+            })
             .catch ((error) => {
-                setMessage(error.data.message);
+                setMessage(error.message);
                 console.error("Ошибка регистрации", error);
             });
         },

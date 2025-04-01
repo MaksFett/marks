@@ -7,7 +7,7 @@ const Profile: React.FC = () => {
     const { data: user, isLoading } = useGetUserQuery();
 
     useEffect(() => {
-        console.log(user);
+        if (user) console.log(user.login);
     }, [user])
 
     if (isLoading) return <div>Загрузка...</div> 
