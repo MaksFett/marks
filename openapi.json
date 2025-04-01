@@ -1,0 +1,590 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Marks",
+    "version": "1.0.11"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:5050"
+    },
+    {
+      "url": "https://localhost:5051"
+    }
+  ],
+  "tags": [
+    {
+      "name": "users",
+      "description": "Everything about your Users"
+    },
+    {
+      "name": "students",
+      "description": "Access to students"
+    },
+    {
+      "name": "marks",
+      "description": "Operations about marks"
+    }
+  ],
+  "paths": {
+    "/users/register": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Registering a user",
+        "description": "Registering a user",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User is already registered"
+          },
+          "500": {
+            "description": "Unknown error"
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Login user",
+        "description": "Login user",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong password"
+          },
+          "404": {
+            "description": "Wrong login"
+          },
+          "500": {
+            "description": "Unknown error"
+          }
+        }
+      }
+    },
+    "/users/get_login": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get user`s login",
+        "description": "Get user`s login from JWT access token payload",
+        "operationId": "getlogin",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "403": {
+            "description": "Wrong token"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/users/get_user": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get user`s info",
+        "description": "Get user`s login from JWT access token payload",
+        "operationId": "getuser",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "403": {
+            "description": "Wrong token"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/users/refresh": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Refresh JWT access token using refresh token",
+        "description": "",
+        "operationId": "refresh",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "402": {
+            "description": "Wrong token"
+          },
+          "403": {
+            "description": "Wrong refresh token"
+          }
+        },
+        "security": [
+          {
+            "cookieRefresh": []
+          }
+        ]
+      }
+    },
+    "/students/get_students": {
+      "get": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Get all students",
+        "description": "",
+        "operationId": "getstudents",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Student"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown error"
+          }
+        },
+        "security": [
+          {
+            "marks_auth": [
+              "read:students"
+            ]
+          }
+        ]
+      }
+    },
+    "/student/add_student": {
+      "post": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Add studnet",
+        "description": "",
+        "operationId": "addstudent",
+        "requestBody": {
+          "description": "Student data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Student"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "unknown error"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "marks_auth": [
+              "write:students",
+              "read:students"
+            ]
+          }
+        ]
+      }
+    },
+    "/student/edit_student": {
+      "post": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Edit existing student",
+        "description": "",
+        "operationId": "editstudent",
+        "requestBody": {
+          "description": "Student data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Student"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "unknown error"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "marks_auth": [
+              "write:students",
+              "read:students"
+            ]
+          }
+        ]
+      }
+    },
+    "/student/delete_student": {
+      "post": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Delete existing student",
+        "description": "",
+        "operationId": "deletestudent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "id of student",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "unknown error"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "marks_auth": [
+              "write:students",
+              "read:students"
+            ]
+          }
+        ]
+      }
+    },
+    "/marks/get_marks": {
+      "get": {
+        "tags": [
+          "marks"
+        ],
+        "summary": "Get all marks with students and subjects as rows and columns",
+        "description": "",
+        "operationId": "getmarks",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "marks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Mark"
+                      }
+                    },
+                    "students": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Student"
+                      }
+                    },
+                    "subjects": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Subject"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "unknown error"
+          }
+        },
+        "security": [
+          {
+            "marks_auth": [
+              "read:marks"
+            ]
+          }
+        ]
+      }
+    },
+    "/marks/add_marks": {
+      "post": {
+        "tags": [
+          "marks"
+        ],
+        "summary": "Add or edit marks",
+        "description": "",
+        "operationId": "addmarks",
+        "requestBody": {
+          "description": "Array of edited marks",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Mark"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "unknown error"
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "marks_auth": [
+              "write:marks",
+              "read:marks"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "john123"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@mail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": 123
+          }
+        }
+      },
+      "Student": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 14
+          },
+          "fio": {
+            "type": "string",
+            "example": "Johnov John Johnson"
+          },
+          "group": {
+            "type": "string",
+            "example": "IUC4-81B"
+          },
+          "enter_year": {
+            "type": "integer",
+            "example": 2021
+          }
+        }
+      },
+      "Subject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 14
+          },
+          "name": {
+            "type": "string",
+            "example": "Philosophy"
+          }
+        }
+      },
+      "Mark": {
+        "type": "object",
+        "properties": {
+          "student_id": {
+            "type": "integer",
+            "example": 14
+          },
+          "subject_id": {
+            "type": "integer",
+            "example": 24
+          },
+          "value": {
+            "type": "integer",
+            "example": 4
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "access-token"
+      },
+      "cookieRefresh": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh-token"
+      },
+      "marks_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://localhost:5050/users/login",
+            "scopes": {
+              "write:marks": "modify marks in your account",
+              "read:marks": "read your marks",
+              "write:students": "modify students in your account",
+              "read:students": "read your students"
+            }
+          }
+        }
+      }
+    }
+  }
+}

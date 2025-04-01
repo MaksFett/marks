@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:16-alpine AS client
 
 WORKDIR /src
 COPY package*.json ./
@@ -9,5 +9,4 @@ EXPOSE ${CLIENT_PORT}
 RUN npm i
 COPY ./ ./
 RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
-RUN npm run build
 CMD ["npm", "run", "start"]

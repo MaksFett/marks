@@ -4,7 +4,7 @@ import { IUser } from "../types";
 
 class UserStore {
     isAuth: boolean = false;
-    user: IUser = null;
+    user: IUser | null = null;
     isLoading: boolean = false;
 
     constructor() {

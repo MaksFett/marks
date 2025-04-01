@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import userStore from "../stores/UserStore";
 import "../Header.css";
-import axios from "axios";
 
 const Header: React.FC = observer(() => {
     const { isAuth, checkAuth, logout } = userStore;

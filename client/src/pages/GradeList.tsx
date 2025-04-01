@@ -3,9 +3,11 @@ import { useParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import Header from "../components/Header";
 import GradeStore from "../stores/GradeStore";
+import UserStore from "../stores/UserStore";
 import "../styles.css";
 
 const GradeList: React.FC = observer(() => {
+    const { isAuth } = UserStore;
     const { id } = useParams<{ id?: string }>();
     const selectedStudentId = id ? parseInt(id, 10) : null;
 
@@ -94,7 +96,7 @@ const GradeList: React.FC = observer(() => {
                     ))}
                 </tbody>
             </table>
-            <button
+            {isAuth && (<button
                 onClick={saveChanges}
                 style={{
                     marginTop: "20px",
@@ -108,7 +110,7 @@ const GradeList: React.FC = observer(() => {
                 }}
             >
                 Сохранить изменения
-            </button>
+            </button>)}
             <div>{message}</div>
         </div>
     );
