@@ -6,17 +6,25 @@ class StudentStore {
   students: IStudent[] = [];
   message: string = "";
   isLoading: boolean = false;
-  cacheTimestamp = null;
+  cacheTimestamp: number | null = null;
   cacheDuration = 60000;
 
   constructor() {
     makeAutoObservable(this);
   }
 
+  get authHeader() {
+    return {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access-token")}`,
+      },
+    };
+  }
+
   isCacheValid = () => {
     return (
         this.cacheTimestamp &&
-        Date.now() - this.cacheTimestamp < this.cacheTimestamp
+        Date.now() - this.cacheTimestamp < this.cacheDuration
     );
   }
 

@@ -13,33 +13,14 @@ const Login: React.FC = () => {
         setLogin,
         setPassword,
         clearMessage,
-        setLoading,
-        setMessage
+        loginUser,
     } = authStore;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        try {
-            const response = await fetch("/user_api/users/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ login, password }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem("access-token", data.accessToken);
-                localStorage.setItem("refresh-token", data.refreshToken);
-                navigate("/");
-            } else {
-                setMessage(data.message || "Ошибка входа");
-            }
-        } catch (error) {
-            setMessage("Ошибка подключения к серверу");
-        } finally {
-            setLoading(false);
+        const success = await loginUser();
+        if (success) {
+            navigate("/");
         }
     };
 

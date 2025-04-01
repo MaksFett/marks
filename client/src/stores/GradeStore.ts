@@ -1,12 +1,14 @@
 import { makeAutoObservable } from "mobx";
 import axios from "axios";
 import { IGrade } from "../types";
+import { IShortStudent } from "../types";
+import { ISubject } from "../types";
 
 class GradeStore {
-    students = [];
-    subjects = [];
-    grades = [];
-    cacheTimestamp = null;
+    students: IShortStudent[] = [];
+    subjects: ISubject[] = [];
+    grades: IGrade[] = [];
+    cacheTimestamp: number | null = null;
     cacheDuration = 60000;
     
     constructor() {
@@ -16,7 +18,7 @@ class GradeStore {
     isCacheValid = () => {
         return (
             this.cacheTimestamp &&
-            Date.now() - this.cacheTimestamp < this.cacheTimestamp
+            Date.now() - this.cacheTimestamp < this.cacheDuration
         );
     }
 
@@ -39,12 +41,16 @@ class GradeStore {
         }
     }
 
-    async saveGrades(editedGrades: Array<IGrade>) {
+    async saveGrades(editedGrades: { [key: string]: number }) {
         const newGrades = Object.entries(editedGrades).map(([key, value]) => {
             const [student_id, subject_id] = key.split("-");
-            return { student_id: Number(student_id), subject_id: Number(subject_id), value: Number(value) };
+            return {
+                student_id: Number(student_id),
+                subject_id: Number(subject_id),
+                value: Number(value),
+            };
         });
-
+    
         try {
             await axios.post("/main_api/marks/add_marks", newGrades, {
                 headers: {
@@ -52,10 +58,13 @@ class GradeStore {
                 },
             });
             await this.fetchGrades();
+            return true;
         } catch (error) {
             console.error("Ошибка сохранения оценок:", error);
+            return false;
         }
     }
+    
 
     updateGrades(edited: { [key: string]: number }) {
         this.grades = this.grades.map(g =>

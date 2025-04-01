@@ -12,16 +12,21 @@ class UserStore {
     }
 
     checkAuth = async () => {
-        await axios.get("/user_api/users/get_login")
-        .then(() => this.isAuth = true )
-        .catch((error) => {
-            if ((error as AxiosError).response !== undefined) { // Проверяем, является ли ошибка экземпляром AxiosError
-                if (error.response?.status === 401) {
-                    try {
-                        axios.post("/user_api/users/refresh");
+        try {
+            await axios.get("/user_api/users/get_login");
+            runInAction(() => {
+                this.isAuth = true;
+            });
+        } catch (error: any) {
+            if ((error as AxiosError).response?.status === 401) {
+                try {
+                    const res = await axios.post("/user_api/users/refresh");
+                    localStorage.setItem("access-token", res.data.access_token);
+                    runInAction(() => {
                         this.isAuth = true;
-                        console.log(this.isAuth)
-                    } catch {
+                    });
+                } catch {
+                    runInAction(() => {
                         this.isAuth = false;
                     });
                 }
@@ -31,8 +36,9 @@ class UserStore {
                     this.isAuth = false;
                 });
             }
-        })
-    }
+        }
+    };
+    
 
     fetchUser = async () => {
         this.isLoading = true;

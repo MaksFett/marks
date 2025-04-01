@@ -4,22 +4,37 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { IStudent } from "../types";
 import "../styles.css";
-import { studentStore } from "../stores/StudentStore"; // Import the MobX store
+import { studentStore } from "../stores/StudentStore";
 import userStore from "../stores/UserStore";
 
-const Home: React.FC = () => {
-    const { students, message, isLoading, fetchStudents, editStudent, deleteStudent, addStudent } = studentStore;
+const Home: React.FC = observer(() => {
+    const { students, message, fetchStudents, editStudent, deleteStudent, addStudent } = studentStore;
     const { isAuth } = userStore;
+
+    const [editingStudent, setEditingStudent] = useState<number | null>(null);
+    const [editedData, setEditedData] = useState<Omit<IStudent, "id">>({
+        fio: "",
+        group: "",
+        enter_year: 0,
+    });
+
+    const [newStudent, setNewStudent] = useState<Omit<IStudent, "id">>({
+        fio: "",
+        group: "",
+        enter_year: 0,
+    });
+
+    const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
 
     useEffect(() => {
         fetchStudents();
-    }, [fetchStudents]);
+    }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof IStudent) => {
         setEditedData({ ...editedData, [field]: e.target.value });
     };
 
-    const handleNewStudentChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const handleNewStudentChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof IStudent) => {
         setNewStudent({ ...newStudent, [field]: e.target.value });
     };
 
@@ -69,7 +84,6 @@ const Home: React.FC = () => {
                         value={newStudent.fio}
                         onChange={(e) => handleNewStudentChange(e, "fio")}
                         placeholder="ФИО"
-                        style={{ width: "100%" }}
                     />
                 </td>
                 <td>
@@ -78,7 +92,6 @@ const Home: React.FC = () => {
                         value={newStudent.group}
                         onChange={(e) => handleNewStudentChange(e, "group")}
                         placeholder="Группа"
-                        style={{ width: "100%" }}
                     />
                 </td>
                 <td>
@@ -87,7 +100,6 @@ const Home: React.FC = () => {
                         value={newStudent.enter_year}
                         onChange={(e) => handleNewStudentChange(e, "enter_year")}
                         placeholder="Год поступления"
-                        style={{ width: "100%" }}
                     />
                 </td>
                 <td>
@@ -114,7 +126,7 @@ const Home: React.FC = () => {
                 <tbody>
                     {students.map((student) => (
                         <tr key={student.id}>
-                            <td style={{ border: "1px solid black", padding: "10px" }}>
+                            <td>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
@@ -127,7 +139,7 @@ const Home: React.FC = () => {
                                     </Link>
                                 )}
                             </td>
-                            <td style={{ border: "1px solid black", padding: "10px" }}>
+                            <td>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="text"
@@ -138,7 +150,7 @@ const Home: React.FC = () => {
                                     student.group
                                 )}
                             </td>
-                            <td style={{ border: "1px solid black", padding: "10px" }}>
+                            <td>
                                 {editingStudent === student.id ? (
                                     <input
                                         type="number"
@@ -149,44 +161,6 @@ const Home: React.FC = () => {
                                     student.enter_year
                                 )}
                             </td>
-<<<<<<< HEAD
-                            <td style={{ border: "1px solid black", padding: "10px" }}>
-                                {isAuth ? (editingStudent === student.id ? (
-                                    <>
-                                        <button
-                                            onClick={() => handleSave(student.id)}
-                                            style={{
-                                                marginRight: "15px",
-                                                padding: "5px 10px",
-                                                cursor: "pointer",
-                                                marginBottom: "10px", 
-                                                marginTop: "10px",
-                                                marginLeft: "20px"
-                                            }}
-                                        >
-                                            Сохранить
-                                        </button>
-                                        <button
-                                            onClick={handleCancel}
-                                            style={{
-                                                padding: "5px 10px",
-                                                cursor: "pointer",
-                                            }}
-                                        >
-                                            Отмена
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button onClick={() => handleEdit(student)} style={{ marginRight: "5px" }}>
-                                            ✏️
-                                        </button>
-                                        <button onClick={() => handleDelete(student.id)} style={{ marginLeft: "5px" }}>
-                                            ❌
-                                        </button>
-                                    </>
-                                )) : <></>}
-=======
                             <td>
                                 {isAuth ? (editingStudent === student.id ? (
                                     <>
@@ -199,7 +173,6 @@ const Home: React.FC = () => {
                                         <button onClick={() => handleDelete(student.id)}>❌</button>
                                     </>
                                 )) : null}
->>>>>>> a3f5757 (Изменения с токенами и улучшение. Костромина)
                             </td>
                         </tr>
                     ))}
@@ -216,6 +189,6 @@ const Home: React.FC = () => {
             {message && <div>{message}</div>}
         </div>
     );
-};
+});
 
-export default observer(Home);
+export default Home;
