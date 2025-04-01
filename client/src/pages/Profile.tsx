@@ -1,14 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useGetUserQuery } from "../store/slices/userApiSlice";
 
 import Header from "../components/Header";
 
 const Profile: React.FC = () => {
     const { data: user, isLoading } = useGetUserQuery();
-
-    useEffect(() => {
-        if (user) console.log(user.login);
-    }, [user])
 
     if (isLoading) return <div>Загрузка...</div> 
 

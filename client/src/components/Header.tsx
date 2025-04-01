@@ -20,14 +20,12 @@ const Header: React.FC = () => {
             })
             .catch((error) => {
                 if (error.status === 401 || error.status === 403) 
-                    {console.log(1)
                     refresh().unwrap()
                         .then(() => dispatch(setAuthState(true)))
-                        .catch(() => dispatch(setAuthState(false)));
-                    console.log(2)}
+                        .catch(() => dispatch(setAuthState(false)))
                 else dispatch(setAuthState(false));
             });
-    }, []);
+    }, [dispatch, getLogin, refresh]);
 
     const handleLogout = () => {
         logout().unwrap()

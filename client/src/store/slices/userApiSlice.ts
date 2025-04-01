@@ -43,7 +43,6 @@ export const userApiSlice = createApi({
             url: 'users/get_login',
             headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`}
         }),
-        invalidatesTags: ['User'],
     }),
     refresh: builder.mutation<void, void>({
         query: () => ({
@@ -51,7 +50,6 @@ export const userApiSlice = createApi({
             method: 'POST',
             headers: {"authorization": `bearer ${localStorage.getItem("refresh-token")}`}
         }),
-        invalidatesTags: ['User'],
     }),
     logoutUser: builder.mutation<void, void>({
         query: () => ({
@@ -59,7 +57,6 @@ export const userApiSlice = createApi({
             method: 'POST',
             headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`}
         }),
-        invalidatesTags: ['User'],
     }),
   }),
 });

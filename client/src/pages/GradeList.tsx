@@ -18,6 +18,7 @@ const GradeList: React.FC = () => {
 
     const {data: query_grades, isLoading} = useGetMarksQuery();
     const [updateMarks] = useUpdateMarkMutation();
+    
     const [grades, setGrades] = useState<Array<IGrade>>([]);
     const [editedGrades, setEditedGrades] = useState<{ [key: string]: number }>({});
 
