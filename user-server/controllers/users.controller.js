@@ -72,13 +72,10 @@ function login(req, res) {
 }
 function refresh(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = req.header("refresh-token");
+        var _a;
+        const token = (_a = req.header("Authorization")) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
         if (!token) {
             res.status(401).json({ message: "Вы не авторизованы" });
-            return;
-        }
-        if (!refreshTokens.includes(token)) {
-            res.status(402).json({ message: "Неверный токен" });
             return;
         }
         try {
@@ -86,19 +83,7 @@ function refresh(req, res) {
             const { accessToken, refreshToken: newRefreshToken } = (0, tokenUtil_1.generateTokens)(decoded.login);
             refreshTokens = refreshTokens.filter(t => t !== token);
             refreshTokens.push(newRefreshToken);
-            res.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 60 * 60 * 1000,
-            });
-            res.cookie("refreshToken", newRefreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
-            res.json({ message: "" });
+            res.status(200).json({ "accessToken": accessToken, "refreshToken": newRefreshToken });
         }
         catch (err) {
             res.status(403).json({ message: "Неправильный refresh-токен" });
@@ -120,7 +105,7 @@ function getUser(req, res) {
             .then((user) => {
             if (user.length == 0)
                 return res.status(404).json({ message: "Нет такого пользователя" });
-            res.status(200).json({ user: user[0] });
+            res.status(200).json(user[0]);
         })
             .catch((err) => {
             console.log(err);

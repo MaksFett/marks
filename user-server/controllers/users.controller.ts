@@ -51,14 +51,9 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function refresh(req: Request, res: Response) {
-  const token = req.header("refresh-token");
+  const token = req.header("Authorization")?.split(" ")[1];
   if (!token) {
     res.status(401).json({ message: "Вы не авторизованы" });
-    return;
-  }
-
-  if (!refreshTokens.includes(token)) {
-    res.status(402).json({ message: "Неверный токен" });
     return;
   }
 
@@ -88,7 +83,7 @@ export async function getUser(req: Request, res: Response) {
     .then((user) => {
       if (user.length == 0) return res.status(404).json({ message: "Нет такого пользователя" });
       
-      res.status(200).json({ user: user[0] });
+      res.status(200).json(user[0]);
     })
     .catch((err) => {
       console.log(err);
