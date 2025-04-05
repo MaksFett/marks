@@ -22,7 +22,7 @@ const Header: React.FC = () => {
                 if (error.status === 401 || error.status === 403) 
                     refresh().unwrap()
                         .then(() => dispatch(setAuthState(true)))
-                        .catch(() => dispatch(setAuthState(false)))
+                        .catch(() => {dispatch(setAuthState(false)); navigate('/login')})
                 else dispatch(setAuthState(false));
             });
     }, [dispatch, getLogin, refresh]);

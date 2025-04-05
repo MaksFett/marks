@@ -54,7 +54,7 @@ export const userApiSlice = createApi({
     logoutUser: builder.mutation<void, void>({
         query: () => ({
             url: 'users/logout',
-            method: 'POST',
+            method: 'GET',
             headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`}
         }),
     }),
