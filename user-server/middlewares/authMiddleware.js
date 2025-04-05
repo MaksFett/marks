@@ -8,7 +8,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authMiddleware = (req, res, next) => {
     var _a;
     const token = (_a = req.header("Authorization")) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
-    console.log(req.headers);
+    console.log(token);
     if (!token) {
         res.status(401).json({ message: "Вы не авторизованны" });
         return;
@@ -18,7 +18,8 @@ const authMiddleware = (req, res, next) => {
         req.body.user = decoded;
         next();
     }
-    catch (_b) {
+    catch (error) {
+        console.log(error);
         res.status(403).json({ message: "Неправильный токен" });
     }
 };

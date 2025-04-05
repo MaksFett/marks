@@ -1,29 +1,38 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthProps } from "../types";
+import { useDispatch, useSelector } from "react-redux";
 import "../Header.css";
-import axios from "axios";
+import { selectIsAuth, setAuthState } from "../store/slices/authSlice";
+import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "../store/slices/userApiSlice";
 
-const Header: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+const Header: React.FC = () => {
+    const isAuth = useSelector(selectIsAuth);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [getLogin] = useGetLoginMutation();
+    const [refresh] = useRefreshMutation();
+    const [logout] = useLogoutUserMutation();
 
     useEffect(() => {
-        axios.get('/user_api/users/get_login', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
-            .then(() => setisauth(true))
+        getLogin().unwrap()
+            .then(() => {
+                dispatch(setAuthState(true));
+            })
             .catch((error) => {
-                if (error.response.status == 401) 
-                    axios.post('/user_api/users/refresh', {headers: { "Authorization": "Bearer " + localStorage.getItem("refresh-token")}})
-                        .then(() => setisauth(true))
-                        .catch(() => {setisauth(false); navigate('/login');});
-                
-                else { setisauth(false); navigate('/login'); }
+                if (error.status === 401 || error.status === 403) 
+                    refresh().unwrap()
+                        .then(() => dispatch(setAuthState(true)))
+                        .catch(() => dispatch(setAuthState(false)))
+                else dispatch(setAuthState(false));
             });
-    }, []);
+    }, [dispatch, getLogin, refresh]);
 
     const handleLogout = () => {
-        axios.get('/user_api/users/logout', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
-        localStorage.clear(); 
-        setisauth(false);
+        logout().unwrap()
+            .then(() => {
+                localStorage.clear();
+                dispatch(setAuthState(false));
+            })
         navigate("/login");
     };
 

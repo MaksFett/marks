@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/Header";
-import { AuthProps, ISubject, IGrade, IShortStudent } from "../types";
+import { ISubject, IGrade, IShortStudent } from "../types";
 import "../styles.css";
-import axios from "axios";
+import { useGetMarksQuery, useUpdateMarkMutation } from "../store/slices/marksApiSlice";
+import { useSelector } from "react-redux";
+import { selectIsAuth } from "../store/slices/authSlice";
 
-const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
+const GradeList: React.FC = () => {
+    const isAuth = useSelector(selectIsAuth);
     const { id } = useParams<{ id?: string }>();
     const selectedStudentId = id ? parseInt(id, 10) : null;
 
@@ -13,23 +16,21 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
 
     const [subjects, setSubjects] = useState<Array<ISubject>>([]);
 
+    const {data: query_grades, isLoading} = useGetMarksQuery();
+    const [updateMarks] = useUpdateMarkMutation();
+    
     const [grades, setGrades] = useState<Array<IGrade>>([]);
     const [editedGrades, setEditedGrades] = useState<{ [key: string]: number }>({});
 
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        axios.get('/main_api/marks/get_marks', {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
-            .then((response) => {
-                setStudents(response.data.students);
-                setSubjects(response.data.subjects);
-                setGrades(response.data.marks);
-            })
-            .catch((error) => {
-                console.log(error.message);
-                setMessage("Неизвестная ошибка")
-            })
-    }, [])
+        if (query_grades) {
+            setGrades(query_grades.marks);
+            setStudents(query_grades.students);
+            setSubjects(query_grades.subjects);
+        }
+    }, [query_grades])
 
     // Функция обновления значения в input
     const handleGradeChange = (studentId: number, subjectId: number, value: number) => {
@@ -44,13 +45,9 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
     const saveChanges = () => {
         console.log("Изменённые оценки:", editedGrades);
         const new_grades = Object.entries(editedGrades).map((g) => new Object({"student_id": Number(g[0].split('-')[0]),"subject_id": Number(g[0].split('-')[1]), "value": Number(g[1])}))
-        axios.post('/main_api/marks/add_marks', new_grades, {headers: { "Authorization": "Bearer " + localStorage.getItem("access-token")}})
-            .then((response) => setMessage(response.data.message))
-            .catch((error) => {
-                if (error.response.status === 406) { setMessage(error.response.data.message); }
-                else { setMessage("Неизвестная ошибка"); } 
-                return
-            });
+        updateMarks(new_grades as Array<IGrade>).unwrap()
+            .then((response) => setMessage(response.message))
+            .catch((error) => {console.log(error.status); setMessage("Неизвестная ошибка"); return});
         setGrades(prevGrades =>
             prevGrades.map(g =>
                 editedGrades[`${g.student_id}-${g.subject_id}`] !== undefined
@@ -61,9 +58,11 @@ const GradeList: React.FC<AuthProps> = ({isAuth, setisauth}) => {
         setEditedGrades({});
     };
 
+    if (isLoading) return <div>Загрузка...</div> 
+
     return (
         <div style={{ padding: "20px" }}>
-            <Header isAuth={isAuth} setisauth={setisauth} />
+            <Header />
             <h1 style={{ fontWeight: "bold" }}>Список оценок</h1>
             <table style={{ borderCollapse: "collapse", width: "100%" }}>
                 <thead>
