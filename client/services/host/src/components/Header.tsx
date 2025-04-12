@@ -21,7 +21,9 @@ const Header: React.FC = () => {
             .catch((error) => {
                 if (error.status === 401 || error.status === 403) 
                     refresh().unwrap()
-                        .then(() => dispatch(setAuthState(true)))
+                        .then((response) => {dispatch(setAuthState(true)); 
+                            localStorage.setItem("access-token", response.accessToken);
+                            localStorage.setItem("refresh-token", response.refreshToken);})
                         .catch(() => {dispatch(setAuthState(false)); navigate('/login')})
                 else dispatch(setAuthState(false));
             });

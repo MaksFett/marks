@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import Header from "../components/Header";
-import Grades from 'grades/Grades';
+const Grades = lazy(() => import('grades/Grades'));
 import "@packages/shared/src/styles.css";
 
 

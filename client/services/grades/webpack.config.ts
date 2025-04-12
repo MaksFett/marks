@@ -47,6 +47,18 @@ export default (env: EnvVariables) => {
                 eager: true,
                 requiredVersion: packageJson.dependencies['react-dom'],
             },
+            'axios': {
+                eager: true,
+                requiredVersion: packageJson.dependencies['axios'],
+            },
+            'react-redux': {
+                eager: true,
+                requiredVersion: packageJson.dependencies['react-redux'],
+            },
+            '@reduxjs/toolkit': {
+                eager: true,
+                requiredVersion: packageJson.dependencies['react-dom'],
+            },
         },
     }))
 

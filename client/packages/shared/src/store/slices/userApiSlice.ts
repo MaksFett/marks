@@ -44,7 +44,7 @@ export const userApiSlice = createApi({
             headers: {"authorization": `bearer ${localStorage.getItem("access-token")}`}
         }),
     }),
-    refresh: builder.mutation<void, void>({
+    refresh: builder.mutation<{"accessToken": string, "refreshToken": string}, void>({
         query: () => ({
             url: 'users/refresh',
             method: 'POST',

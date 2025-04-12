@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import Header from "../components/Header";
-import Students from 'students/Students';
+const Students = lazy(() => import('students/Students'));
 import "@packages/shared/src/styles.css";
 
 
