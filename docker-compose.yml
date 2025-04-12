@@ -85,6 +85,8 @@ services:
       - /src/node_modules
     ports:
       - $CLIENT_PORT:$CLIENT_PORT
+      - $CLIENT_PORT1:$CLIENT_PORT1
+      - $CLIENT_PORT2:$CLIENT_PORT2
   
   adminer:
     image: adminer:latest

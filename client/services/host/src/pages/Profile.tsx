@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetUserQuery } from "../store/slices/userApiSlice";
+import { useGetUserQuery } from "@packages/shared/src/store/slices/userApiSlice";
 
 import Header from "../components/Header";
 

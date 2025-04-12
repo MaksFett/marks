@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Header from "../components/Header";
-import { IStudent } from "../types";
-import "../styles.css";
+import { IStudent } from "@packages/shared/src/types";
+import "@packages/shared/src/styles.css";
 import { useSelector } from "react-redux";
-import { selectIsAuth } from "../store/slices/authSlice";
-import { useGetStudentsQuery, useAddStudentMutation, useEditStudentMutation, useDeleteStudentMutation } from "../store/slices/studentApiSlice";
+import { selectIsAuth } from "@packages/shared/src/store/slices/authSlice";
+import { useGetStudentsQuery, useAddStudentMutation, useEditStudentMutation, useDeleteStudentMutation } from "@packages/shared/src/store/slices/studentApiSlice";
 
-const Home: React.FC = () => {
+const Students: React.FC = () => {
     const isAuth = useSelector(selectIsAuth);
     const {data: query_students, isLoading} = useGetStudentsQuery();
     const [students, setStudents] = useState<Array<IStudent>>([]);
@@ -162,8 +161,7 @@ const Home: React.FC = () => {
     if (isLoading) return <div>Загрузка...</div> 
 
     return (
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <Header />
+        <div>
             <h1 style={{ fontWeight: "bold", textAlign: "center" }}>Список студентов</h1>
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
                 <thead>
@@ -270,4 +268,4 @@ const Home: React.FC = () => {
     );
 };
 
-export default Home;
+export default Students;

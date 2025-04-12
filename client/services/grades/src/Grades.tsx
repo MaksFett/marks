@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Header from "../components/Header";
-import { ISubject, IGrade, IShortStudent } from "../types";
-import "../styles.css";
-import { useGetMarksQuery, useUpdateMarkMutation } from "../store/slices/marksApiSlice";
+import { ISubject, IGrade, IShortStudent } from "@packages/shared/src/types";
+import "@packages/shared/src/styles.css";
+import { useGetMarksQuery, useUpdateMarkMutation } from "@packages/shared/src/store/slices/marksApiSlice";
 import { useSelector } from "react-redux";
-import { selectIsAuth } from "../store/slices/authSlice";
+import { selectIsAuth } from "@packages/shared/src/store/slices/authSlice";
 
-const GradeList: React.FC = () => {
+const Grades: React.FC = () => {
     const isAuth = useSelector(selectIsAuth);
     const { id } = useParams<{ id?: string }>();
     const selectedStudentId = id ? parseInt(id, 10) : null;
@@ -61,8 +60,7 @@ const GradeList: React.FC = () => {
     if (isLoading) return <div>Загрузка...</div> 
 
     return (
-        <div style={{ padding: "20px" }}>
-            <Header />
+        <div>
             <h1 style={{ fontWeight: "bold" }}>Список оценок</h1>
             <table style={{ borderCollapse: "collapse", width: "100%" }}>
                 <thead>
@@ -136,4 +134,4 @@ const GradeList: React.FC = () => {
     );
 };
 
-export default GradeList;
+export default Grades;

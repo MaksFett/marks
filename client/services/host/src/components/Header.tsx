@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import "../Header.css";
-import { selectIsAuth, setAuthState } from "../store/slices/authSlice";
-import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "../store/slices/userApiSlice";
+import { selectIsAuth, setAuthState } from "@packages/shared/src/store/slices/authSlice";
+import { useGetLoginMutation, useRefreshMutation, useLogoutUserMutation } from "@packages/shared/src/store/slices/userApiSlice";
 
 const Header: React.FC = () => {
     const isAuth = useSelector(selectIsAuth);

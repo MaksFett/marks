@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useRegisterUserMutation } from "../store/slices/userApiSlice";
+import { useRegisterUserMutation } from "@packages/shared/src/store/slices/userApiSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { IUser } from "../types";
+import { IUser } from "@packages/shared/src/types";
 
 const Register: React.FC = () => {
     const navigate = useNavigate();

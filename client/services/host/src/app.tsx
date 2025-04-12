@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import GradeList from "./pages/GradeList";
-import "./styles.css";
+import "@packages/shared/src/styles.css";
 import "./Header.css";
 
 const App: React.FC = () => {
